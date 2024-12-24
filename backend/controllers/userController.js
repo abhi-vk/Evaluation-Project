@@ -82,4 +82,69 @@ const registerUser = async (req, res, next) => {
     }
 };
 
+const userDashboard = async (req, res, next) => {
+    try {
+        const userdata = await User.findById(req.user)
+            .populate({
+                path: 'workspaces',
+                select: '_id name', // Fetch only the _id and name fields of workspaces
+            });
+
+        if (!userdata) {
+            throw Object.assign(Error("User not found."), { code: 404 });
+        }
+
+        res.status(200).json({
+            status: "success",
+            user: {
+                username: userdata.username,
+                email: userdata.email,
+                workspaces: userdata.workspaces, // Array of workspace IDs and names
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+const updateUser = async (req, res, next) => {
+    try {
+        const userId = req.user;
+        const { username, email, oldPassword, newPassword } = req.body;
+        const userdata = await User.findOne({ _id: userId });
+
+        if (userdata) {
+            const updatedata = {};
+            if (username) updatedata.username = username;
+            if (email) {
+                if (await User.findOne({ email: email })) {
+                    throw Object.assign(Error("User with this email already exists."), { code: 409 });
+                }
+                updatedata.email = email
+            }
+
+            if (newPassword) {
+                if (!await bcrypt.compare(oldPassword, userdata.password)) {
+                    throw Object.assign(Error("Your old password seems to be incorrect."), { code: 409 });
+                }
+                if (await bcrypt.compare(oldPassword, userdata.password) == await bcrypt.compare(newPassword, userdata.password)) {
+                    throw Object.assign(Error("New password can not be same as old password."), { code: 409 });
+                }
+                updatedata.password = await bcrypt.hash(newPassword, 10);
+            }
+
+            if (Object.keys(updatedata).length === 0) {
+                res.status(200).json({ status: "success", msg: "You have not set anything to updated." });
+            }
+
+            await User.findByIdAndUpdate(userId, updatedata);
+            res.status(200).json({ status: "success", msg: "Profile updated successfully." });
+        } else {
+            throw Object.assign(Error("Not a valid user, please relogin."), { code: 404 });
+        }
+    } catch (err) {
+        next(err);
+    }
+};
+
+
 module.exports = { loginUser, registerUser, updateUser, userDashboard };
