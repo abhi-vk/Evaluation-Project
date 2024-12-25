@@ -4,10 +4,11 @@ const bodyParser = require('body-parser');
 var cors = require('cors');
 const dotenv = require('dotenv');
 
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const folderRoutes = require('./src/routes/folderRoutes');
+const formRoutes = require('./src/routes/formRoutes');
 
-
-const errorHandler = require('./middlewares/errorHandler');
+const errorHandler = require('./src/middlewares/errorHandler');
 
 const app = express();
 dotenv.config();
@@ -17,7 +18,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(userRoutes);
-
+app.use(folderRoutes);
+app.use(formRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).send({ status: "success", msg: "API is working well." });

@@ -12,8 +12,8 @@ const workspaceSchema = new mongoose.Schema({
     },
     members: [ 
         {
-            type: mongoose.ObjectId,
-            ref: 'User',
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            permission: { type: String, enum: ['view', 'edit'], default: 'view' }, 
         },
     ],
     folders: [

@@ -63,7 +63,7 @@ const registerUser = async (req, res, next) => {
             const defaultWorkspace = await Workspace.create({
                 name: `${username}'s workspace`,
                 owner: newUser._id,
-                members: [newUser._id],
+                members: [],
                 folders: [],
                 forms: [],
             });
