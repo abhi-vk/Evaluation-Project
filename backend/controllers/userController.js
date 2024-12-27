@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/User');
 const Workspace = require('../models/Workspace');
 
@@ -14,9 +13,9 @@ const loginUser = async (req, res, next) => {
                 // Create default workspace if user doesn't have one (edge case)
                 if (userdata.workspaces.length === 0) {
                     const defaultWorkspace = await Workspace.create({
-                        name: `${userdata.username}'s workspace`,
+                        name: `${userdata.username}`,
                         owner: userdata._id,
-                        members: [userdata._id],
+                        members: [{ userId: userdata._id, permission: 'edit' }],
                         folders: [],
                         forms: [],
                     });
@@ -26,7 +25,11 @@ const loginUser = async (req, res, next) => {
                     await userdata.save();
                 }
 
-                const token = jwt.sign({ uid: userdata._id }, process.env.JWT_SECRET);
+                const token = jwt.sign(
+                    { uid: userdata._id, activeWorkspaceId: userdata.workspaces[0]._id },
+                    process.env.JWT_SECRET
+                );
+
                 res.status(200).json({ 
                     status: "success", 
                     msg: "Login successful.", 
@@ -52,23 +55,19 @@ const registerUser = async (req, res, next) => {
         } else {
             const hashedPassword = await bcrypt.hash(confirmPassword, 10);
             
-            
             const newUser = await User.create({ 
                 username, 
-                email, 
+                email,
                 password: hashedPassword,
             });
 
-           
             const defaultWorkspace = await Workspace.create({
-                name: `${username}'s workspace`,
+                name: `${username}`,
                 owner: newUser._id,
-                members: [],
+                members: [{ userId: newUser._id, permission: 'edit' }],
                 folders: [],
                 forms: [],
             });
-
-            
             newUser.workspaces.push(defaultWorkspace._id);
             await newUser.save();
 
@@ -106,11 +105,12 @@ const userDashboard = async (req, res, next) => {
         next(err);
     }
 };
+
 const updateUser = async (req, res, next) => {
     try {
         const userId = req.user;
         const { username, email, oldPassword, newPassword } = req.body;
-        const userdata = await User.findOne({ _id: userId });
+        const userdata = await User.findById(userId);
 
         if (userdata) {
             const updatedata = {};
@@ -119,21 +119,21 @@ const updateUser = async (req, res, next) => {
                 if (await User.findOne({ email: email })) {
                     throw Object.assign(Error("User with this email already exists."), { code: 409 });
                 }
-                updatedata.email = email
+                updatedata.email = email;
             }
 
             if (newPassword) {
                 if (!await bcrypt.compare(oldPassword, userdata.password)) {
                     throw Object.assign(Error("Your old password seems to be incorrect."), { code: 409 });
                 }
-                if (await bcrypt.compare(oldPassword, userdata.password) == await bcrypt.compare(newPassword, userdata.password)) {
-                    throw Object.assign(Error("New password can not be same as old password."), { code: 409 });
+                if (await bcrypt.compare(oldPassword, userdata.password) === await bcrypt.compare(newPassword, userdata.password)) {
+                    throw Object.assign(Error("New password cannot be the same as old password."), { code: 409 });
                 }
                 updatedata.password = await bcrypt.hash(newPassword, 10);
             }
 
             if (Object.keys(updatedata).length === 0) {
-                res.status(200).json({ status: "success", msg: "You have not set anything to updated." });
+                return res.status(200).json({ status: "success", msg: "No changes were made." });
             }
 
             await User.findByIdAndUpdate(userId, updatedata);
@@ -145,6 +145,5 @@ const updateUser = async (req, res, next) => {
         next(err);
     }
 };
-
 
 module.exports = { loginUser, registerUser, updateUser, userDashboard };

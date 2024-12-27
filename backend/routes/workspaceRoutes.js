@@ -6,5 +6,6 @@ const { inviteUser } = require('../controllers/Workspace');
 
 // Route to invite a user
 router.post('/workspace/invite', verifyToken, inviteUser);
+router.post('/workspace/switch', verifyToken, switchWorkspace);
 
 module.exports = router;

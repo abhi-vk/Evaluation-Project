@@ -22,8 +22,8 @@ const createForm = async (req, res, next) => {
     try {
         const { folderId, formName } = req.body;
 
-        // Fetch workspaceId from headers
-        const workspaceId = req.headers['workspace-id'];
+        // Fetch workspaceId from req.activeWorkspaceId
+        const workspaceId = req.activeWorkspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
         if (!ObjectId.isValid(workspaceId)) throw Object.assign(Error("Invalid Workspace ID."), { code: 400 });
 
@@ -53,8 +53,8 @@ const createForm = async (req, res, next) => {
 // Fetch all forms for a workspace
 const fetchAllForm = async (req, res, next) => {
     try {
-        // Fetch workspaceId from headers
-        const workspaceId = req.headers['workspace-id'];
+        // Fetch workspaceId from req.activeWorkspaceId
+        const workspaceId = req.activeWorkspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
         if (!ObjectId.isValid(workspaceId)) throw Object.assign(Error("Invalid Workspace ID."), { code: 400 });
 

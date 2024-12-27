@@ -4,11 +4,11 @@ const bodyParser = require('body-parser');
 var cors = require('cors');
 const dotenv = require('dotenv');
 
-const userRoutes = require('./src/routes/userRoutes');
-const folderRoutes = require('./src/routes/folderRoutes');
-const formRoutes = require('./src/routes/formRoutes');
+const userRoutes = require('./routes/userRoutes');
+const folderRoutes = require('./routes/folderRoutes');
+const formRoutes = require('./routes/formRoutes');
 
-const errorHandler = require('./src/middlewares/errorHandler');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 dotenv.config();
@@ -34,5 +34,5 @@ app.use(errorHandler);
 
 const port = process.env.PORT || 5000
 app.listen(port, () => {
-    mongoose.connect(process.env.DB_URL).then(() => console.log('Server is running :)')).catch((error) => console.log(error))
+    mongoose.connect(process.env.DB_URL).then(() => console.log('DB connected')).catch((error) => console.log(error))
 })

@@ -22,7 +22,7 @@ const validateFolderData = async (folderId, workspaceId) => {
 const createFolder = async (req, res, next) => {
     try {
         const { folderName } = req.body;
-        const workspaceId = req.headers['workspace-id'];
+        const workspaceId = req.activeWorkspaceId;
 
         if (!folderName) throw Object.assign(Error("Please enter folder name."), { code: 400 });
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
@@ -47,7 +47,7 @@ const createFolder = async (req, res, next) => {
 // Fetch All Folders for a Workspace
 const fetchAllFolder = async (req, res, next) => {
     try {
-        const workspaceId = req.headers['workspace-id'];
+        const workspaceId = req.activeWorkspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
 
         const folderdata = await Folder.find({ workspaceId });
@@ -61,7 +61,7 @@ const fetchAllFolder = async (req, res, next) => {
 const fetchAllFormByFolder = async (req, res, next) => {
     const { folderId } = req.params;
     try {
-        const workspaceId = req.headers['workspace-id'];
+        const workspaceId = req.activeWorkspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
 
         await validateFolderData(folderId, workspaceId);
@@ -77,7 +77,7 @@ const fetchAllFormByFolder = async (req, res, next) => {
 const deleteFolder = async (req, res, next) => {
     const { folderId } = req.params;
     try {
-        const workspaceId = req.headers['workspace-id'];
+        const workspaceId = req.activeWorkspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
 
         const folder = await validateFolderData(folderId, workspaceId);
