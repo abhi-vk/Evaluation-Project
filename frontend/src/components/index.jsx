@@ -7,6 +7,8 @@ import DeleteModal from "./deleteModal";
 import FormCard from "./formCard";
 import WorkspaceNavbar from "./workspaceNavbar";
 import FormBox from "./formBox";
+import AdminContent from "./adminContent";
+import UserContent from "./userContent";
 export{
     Navbar,
     Footer,
@@ -16,5 +18,7 @@ export{
     FolderButton,
     FormCard,
     WorkspaceNavbar,
-    FormBox
+    FormBox,
+    AdminContent,
+    UserContent
 }

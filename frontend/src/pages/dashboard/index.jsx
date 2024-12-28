@@ -30,7 +30,7 @@ function Dashboard() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [isDataFetched, setIsDataFetched] = useState(false); // New state to track fetching status
-  const [entityType, setEntityType] = useState(null) // Add state for entityType
+  const [entityType, setEntityType] = useState(null); // Add state for entityType
 
   const openCreateModal = () => {
     setFolderName('');
@@ -40,11 +40,15 @@ function Dashboard() {
   };
 
   const openDeleteModal = (id, type = "folder") => {
-    setEntityType(type); setFormId(null); setFolderId(null);
-    if (type == "form") setFormId(id); else setFolderId(id);
-    setDeleteModalOpen(true); setCreateModalOpen(false);
-};
-  
+    setEntityType(type);
+    setFormId(null);
+    setFolderId(null);
+    if (type === "form") setFormId(id);
+    else setFolderId(id);
+    setDeleteModalOpen(true);
+    setCreateModalOpen(false);
+  };
+
   const createFolder = async () => {
     setFolderNameError('');
     if (folderName.trim().length === 0) {
@@ -54,7 +58,7 @@ function Dashboard() {
     const data = await createFolderApi(folderName, token);
     if (data) {
       setCreateModalOpen(false);
-      fetchAllFolder(); // Refetch folders after creating a new one
+      fetchAllFolder(); 
     }
   };
 
@@ -65,7 +69,12 @@ function Dashboard() {
 
   const fetchAllForm = async () => {
     const data = await fetchAllFormApi(token);
-    if (data) setAllForm(data);
+    console.log(data); 
+  
+    if (data) {
+      
+      setAllForm(data.filter((form) => !form.folderId)); 
+    }
   };
 
   const deleteFolder = async () => {
@@ -77,11 +86,20 @@ function Dashboard() {
   };
 
   const deleteForm = async () => {
-    const data = await deleteFormApi(formId, token);
-    if (data) {
-      setDeleteModalOpen(false);
-      fetchAllForm(); 
+    try {
+      const data = await deleteFormApi(formId); // Pass only formId to the API
 
+      if (data) {
+        // Update the state directly to remove the deleted form
+        setAllForm((prevForms) => prevForms.filter((form) => form._id !== formId));
+
+        // Close the delete modal
+        setDeleteModalOpen(false);
+      } else {
+        console.log('Form deletion failed');
+      }
+    } catch (error) {
+      console.error('Error deleting form:', error);
     }
   };
 

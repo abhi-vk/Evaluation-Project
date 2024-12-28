@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useAuth from '../../auth/useAuth';
-import { fetchFormByIdApi, updateFormApi } from "../../services/Form";
+import { fetchFormByIdApi, updateFormApi } from '../../services/Form';
 
-import {WorkspaceNavbar} from '../../components';
+import { WorkspaceNavbar } from '../../components';
 import { FormBox } from '../../components';
 
 import styles from './workspace.module.css';
@@ -12,84 +12,103 @@ import styles from './workspace.module.css';
 function Workspace() {
     const token = useAuth();
     const [searchParams] = useSearchParams();
-
     const [formId, setFormId] = useState(searchParams.get('wid'));
     const [formBox, setFormBox] = useState([]);
     const [formBoxError, setFormBoxError] = useState({});
     const [clickCounts, setClickCounts] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const hasFetchedRef = useRef(false); // Ref to track fetch status
 
     const adminButtons = [
-        { role: "admin", src: "chat.png", type: "Text", hint: "Click here to edit", value: "" },
-        { role: "admin", src: "photo.png", type: "Image", hint: "Click to add link", value: "" },
-        { role: "admin", src: "video.png", type: "Video", hint: "Click to add link", value: "" },
-        { role: "admin", src: "gif.png", type: "GIF", hint: "Click to add link", value: "" }
+        { role: 'admin', src: 'chat.png', type: 'Text', hint: 'Click here to edit', value: '' },
+        { role: 'admin', src: 'photo.png', type: 'Image', hint: 'Click to add link', value: '' },
+        { role: 'admin', src: 'video.png', type: 'Video', hint: 'Click to add link', value: '' },
+        { role: 'admin', src: 'gif.png', type: 'GIF', hint: 'Click to add link', value: '' },
     ];
 
     const userButtons = [
-        { role: "user", src: "text.png", type: "Text", hint: "input a text on his form" },
-        { role: "user", src: "hash.png", type: "Number", hint: "input a number on his form" },
-        { role: "user", src: "at.png", type: "Email", hint: "input a email on his form" },
-        { role: "user", src: "call.png", type: "Phone", hint: "input a phone on his form" },
-        { role: "user", src: "calendar.png", type: "Date", hint: "select a date" },
-        { role: "user", src: "star.png", type: "Rating", hint: "tap to rate out of 5" },
-        { role: "user", src: "checkbox.png", type: "Button", hint: "Click to add button text", value: "" }
+        { role: 'user', src: 'text.png', type: 'Text', hint: 'Input text on this form' },
+        { role: 'user', src: 'hash.png', type: 'Number', hint: 'Input a number on this form' },
+        { role: 'user', src: 'at.png', type: 'Email', hint: 'Input an email on this form' },
+        { role: 'user', src: 'call.png', type: 'Phone', hint: 'Input a phone on this form' },
+        { role: 'user', src: 'calendar.png', type: 'Date', hint: 'Select a date' },
+        { role: 'user', src: 'star.png', type: 'Rating', hint: 'Tap to rate out of 5' },
+        { role: 'user', src: 'checkbox.png', type: 'Button', hint: 'Click to add button text', value: '' },
     ];
 
+    // Add a new box to the form sequence
     const handleAddBox = (data) => {
-        if (!formId) { toast.error("Enter form name and hit save."); return }
+        if (!formId) {
+            toast.error('Enter form name and hit save.');
+            return;
+        }
         const key = `${data.role}-${data.type}`;
         const newCount = (clickCounts[key] || 0) + 1;
         setClickCounts((prevCounts) => ({ ...prevCounts, [key]: newCount }));
 
         setFormBox([...formBox, { key: key + ":" + newCount, data }]);
+
+        // Handle button click state
+        if (data.type === 'Button') {
+            setFormBox((prevFormBox) => {
+                const updatedFormBox = [...prevFormBox];
+                updatedFormBox[updatedFormBox.length - 1].data.value = 'submit';
+                return updatedFormBox;
+            });
+        }
     };
 
+    // Remove a box from the form sequence
     const handleRemoveBox = (index) => {
-        const oldbox = formBox[index];
-        const [oldKey, oldVal] = oldbox.key.split(":");
-
-        const newbox = formBox.filter((_, idx) => idx !== index);
-        const newFormBox = newbox.map((element) => {
-            const [curKey, curVal] = element.key.split(":");
-
-            if (curKey === oldKey && parseInt(curVal) > oldVal) {
-                const newele = { ...element };
-                newele.key = curKey + ":" + (parseInt(curVal) - 1);
-                return newele;
-            } else {
-                return element;
-            }
-        });
-
-        const newCount = (clickCounts[oldKey] || 0) - 1;
-        setClickCounts((prevCounts) => ({ ...prevCounts, [oldKey]: newCount }));
-
-        setFormBox(newFormBox);
+        const updatedFormBox = formBox.filter((_, i) => i !== index);
+        setFormBox(updatedFormBox);
     };
 
+    // Update the value of a form box
     const getFormBoxValue = (index, value) => {
-        const newFormBox = formBox.map((element, idx) => {
-            if (idx == index) {
-                const newele = { ...element };
-                newele.data.value = value;
-                return newele;
-            } else {
-                return element;
-            }
+        setFormBox((prevFormBox) => {
+            const updatedFormBox = [...prevFormBox];
+            updatedFormBox[index] = {
+                ...updatedFormBox[index],
+                data: { ...updatedFormBox[index].data, value },
+            };
+            return updatedFormBox;
         });
 
-        setFormBox(newFormBox);
-
-        setFormBoxError(prevErrors => ({
-            ...prevErrors, [index]: value === '' ? 'Required Field' : null
+        // Error handling for form input
+        setFormBoxError((prevErrors) => ({
+            ...prevErrors,
+            [index]: value === '' ? 'Required Field' : null,
         }));
     };
 
-    const fetchFormById = async () => {
-        const data = await fetchFormByIdApi(formId, token);
-        if (data) setFormBox(data.formSequence);
-    };
+    // Fetch form data by ID
+    const fetchFormById = useCallback(async () => {
+        if (!formId || hasFetchedRef.current || isLoading) return; // Prevent re-fetching if already fetched or loading
 
+        setIsLoading(true);
+        setErrorMessage('');
+        console.log('Fetching form data for ID:', formId);
+
+        try {
+            const data = await fetchFormByIdApi(formId, token);
+            if (data) {
+                setFormBox(data.formSequence);
+                hasFetchedRef.current = true; // Mark fetch as complete
+                console.log('Form data fetched successfully:', data);
+            } else {
+                setErrorMessage('Failed to fetch form data. Please try again later.');
+            }
+        } catch (error) {
+            console.error('API Error:', error);
+            setErrorMessage('API Error: Failed to fetch form data.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [formId, token, isLoading]); // Make sure `isLoading` is included to prevent conflicts
+
+    // Update the form sequence
     const updateFormSequence = async () => {
         let error = false;
         const newErrors = {};
@@ -97,8 +116,9 @@ function Workspace() {
         formBox.forEach((element, index) => {
             const { role, type, value } = element.data;
 
+            // Button validation: consider 'clicked' value as valid for Button type
             if (role === 'admin' || (role === 'user' && type === 'Button')) {
-                if (!value) {
+                if (!value || value === 'Submit') {
                     error = true;
                     newErrors[index] = 'Required Field';
                 }
@@ -108,32 +128,23 @@ function Workspace() {
         setFormBoxError(newErrors);
 
         if (!error) {
-            const data = await updateFormApi(formId, { formSequence: formBox }, token);
-            if (data) toast.success("Form updated successfully.");
+            try {
+                const data = await updateFormApi(formId, { formSequence: formBox }, token);
+                if (data) {
+                    toast.success('Form updated successfully.');
+                    hasFetchedRef.current = false; // Allow refetch if needed
+                }
+            } catch (err) {
+                toast.error('Error updating form.');
+            }
         }
     };
 
     useEffect(() => {
-        const result = {};
-        formBox.forEach(element => {
-            const { role, type } = element.data;
-            const roleTypeKey = `${role}-${type}`;
-
-            if (result[roleTypeKey]) {
-                result[roleTypeKey]++;
-            } else {
-                result[roleTypeKey] = 1;
-            }
-        });
-
-        setClickCounts(result);
-    }, [formBox]);
-
-    useEffect(() => {
-        if (token) {
-            if (formId) fetchFormById();
+        if (formId && token && !hasFetchedRef.current) {
+            fetchFormById();
         }
-    }, [token]);
+    }, [formId, token]); 
 
     return (
         <main className={styles.workspace}>
@@ -144,7 +155,8 @@ function Workspace() {
                     <div className={styles.bubbles}>
                         {adminButtons.map((button, index) => (
                             <button key={index} onClick={() => handleAddBox(button)}>
-                                <img src={`/icons/${button.src}`} alt={`${button.src} icon`} />{button.type}
+                                <img src={`/icons/${button.src}`} alt={`${button.type} icon`} />
+                                {button.type}
                             </button>
                         ))}
                     </div>
@@ -152,7 +164,8 @@ function Workspace() {
                     <div className={styles.inputs}>
                         {userButtons.map((button, index) => (
                             <button key={index} onClick={() => handleAddBox(button)}>
-                                <img src={`/icons/${button.src}`} alt={`${button.src} icon`} />{button.type}
+                                <img src={`/icons/${button.src}`} alt={`${button.type} icon`} />
+                                {button.type}
                             </button>
                         ))}
                     </div>
@@ -160,14 +173,14 @@ function Workspace() {
                 <div className={styles.layout}>
                     <div className={styles.card}>
                         <div className={styles.start}>
-                            <img src="/icons/flag.png" alt="flag icon" />
+                            <img src="/icons/flag.png" alt="Start icon" />
                             <span className={styles.title}>Start</span>
                         </div>
                     </div>
-                    {formBox.map((button, index) => (
+                    {formBox.map((box, index) => (
                         <FormBox
-                            key={index}
-                            button={button}
+                            key={box.key}
+                            button={box}
                             index={index}
                             handleRemoveBox={handleRemoveBox}
                             getFormBoxValue={getFormBoxValue}
@@ -177,8 +190,9 @@ function Workspace() {
                     <div className={styles.endCard}></div>
                 </div>
             </div>
+            {errorMessage && <div className={styles.error}>{errorMessage}</div>}
         </main>
-    )
+    );
 }
 
-export default Workspace
+export default Workspace;

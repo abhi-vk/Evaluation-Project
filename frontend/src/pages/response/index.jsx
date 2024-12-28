@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useAuth from '../../auth/useAuth';
 import { fetchFormByIdApi } from "../../services/Form";
@@ -9,46 +9,70 @@ function Response() {
     const token = useAuth();
     const [searchParams] = useSearchParams();
 
-    const [formId, setFormId] = useState(searchParams.get('wid'));
+    const formId = searchParams.get('wid');
     const [formStarts, setFormStarts] = useState(0);
     const [formCompletion, setFormCompletion] = useState(0);
 
     const [noResponse, setNoResponse] = useState(false);
     const [formData, setFormData] = useState({ formHits: 0, formSequence: [], formResponse: [] });
+    const [hasFetched, setHasFetched] = useState(false); // New flag to track fetch status
 
     const { formHits, formSequence, formResponse } = formData;
-    const headers = formSequence.filter((data) => data.key.includes("user")).map(item => item.key);
 
-    const getFromStats = () => {
-        let starts = 0, completes = 0;
-        const seqLength = formSequence.filter(item => item.data.role === 'user').length;
+    // Filter to get all user-related keys from formSequence
+    const headers = formSequence
+        .filter((data) => data.key.includes("user"))
+        .map((item) => item.key);
+
+    // Debugging logs
+    console.log('Headers:', headers);
+    console.log('Form Sequence:', formSequence);
+    console.log('Form Response:', formResponse);
+
+    // Fetch form stats
+    const getFromStats = useCallback(() => {
+        console.log('Running getFromStats...');
+        let starts = 0,
+            completes = 0;
+        const seqLength = formSequence.filter((item) => item.data.role === 'user').length;
 
         formResponse.forEach((item) => {
             const resLength = Object.keys(item).length;
-            seqLength == resLength - 2 ? completes++ : starts++;
-        })
+            seqLength === resLength - 2 ? completes++ : starts++; // Check if response is complete or just started
+        });
 
         setFormStarts(starts);
         setFormCompletion(completes);
-    };
+    }, [formSequence, formResponse]);
 
-    const fetchFormById = async () => {
-        const data = await fetchFormByIdApi(formId, token);
-        setFormData(data);
-        if (data.formResponse.length == 0) setNoResponse(true);
-    };
+    // Fetch form data
+    const fetchFormById = useCallback(async () => {
+        try {
+            console.log('Fetching form by ID...');
+            const data = await fetchFormByIdApi(formId, token);
+            console.log('Fetched Form Data:', data);
+            setFormData(data);
+
+            if (data.formResponse.length === 0) {
+                setNoResponse(true); // No responses
+            }
+            setHasFetched(true); // Mark fetch as complete
+        } catch (error) {
+            console.error('Error fetching form:', error);
+        }
+    }, [formId, token]);
 
     useEffect(() => {
-        if (token && formId) {
+        if (token && formId && !hasFetched) {
             fetchFormById();
         }
-    }, [token, formId]);
+    }, [token, formId, fetchFormById, hasFetched]);
 
     useEffect(() => {
-        if (token && formId) {
+        if (hasFetched && formSequence.length && formResponse.length) {
             getFromStats();
         }
-    }, [formSequence, formResponse]);
+    }, [hasFetched, formSequence, formResponse, getFromStats]);
 
     return (
         <div className={styles.response}>
@@ -97,7 +121,7 @@ function Response() {
                 </div>
             </section>
         </div>
-    )
+    );
 }
 
 export default Response;

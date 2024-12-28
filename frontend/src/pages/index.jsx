@@ -6,6 +6,7 @@ import Folders from "./folder";
 import Settings from "./settings";
 import Workspace from "./workspace";
 import Response from "./response";
+import SharedForm from "./sharedForm";
 export{
     Homepage,
     Login,
@@ -14,5 +15,6 @@ export{
     Folders,
     Settings,
     Workspace,
-    Response
+    Response,
+    SharedForm
 }
