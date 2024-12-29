@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import useAuth from '../../auth/useAuth';
 import { fetchFormByIdApi } from "../../services/Form";
 import { WorkspaceNavbar } from '../../components';
+import { PieChart } from 'react-minimal-pie-chart';  
 import styles from './response.module.css';
 
 function Response() {
@@ -24,14 +25,8 @@ function Response() {
         .filter((data) => data.key.includes("user"))
         .map((item) => item.key);
 
-    // Debugging logs
-    console.log('Headers:', headers);
-    console.log('Form Sequence:', formSequence);
-    console.log('Form Response:', formResponse);
-
     // Fetch form stats
     const getFromStats = useCallback(() => {
-        console.log('Running getFromStats...');
         let starts = 0,
             completes = 0;
         const seqLength = formSequence.filter((item) => item.data.role === 'user').length;
@@ -48,9 +43,7 @@ function Response() {
     // Fetch form data
     const fetchFormById = useCallback(async () => {
         try {
-            console.log('Fetching form by ID...');
             const data = await fetchFormByIdApi(formId, token);
-            console.log('Fetched Form Data:', data);
             setFormData(data);
 
             if (data.formResponse.length === 0) {
@@ -74,6 +67,8 @@ function Response() {
         }
     }, [hasFetched, formSequence, formResponse, getFromStats]);
 
+    const completionPercentage = formHits ? parseInt(formCompletion / formHits * 100) : 0;
+
     return (
         <div className={styles.response}>
             <WorkspaceNavbar />
@@ -88,10 +83,7 @@ function Response() {
                         <p>Starts</p>
                         <p>{formStarts}</p>
                     </div>
-                    <div className={styles.card}>
-                        <p>Completion rate</p>
-                        <p>{formHits ? parseInt(formCompletion / formHits * 100) : 0} %</p>
-                    </div>
+                    
                 </div>
                 <div className={styles.tableContainer}>
                     {formResponse.length > 0 && (
@@ -100,8 +92,8 @@ function Response() {
                                 <tr>
                                     <th></th>
                                     <th>First Interaction Time</th>
-                                    {headers.map((key) => (
-                                        <th key={key}>{key.split("-")[1].split(":").join(" ")}</th>
+                                    {headers.map((key, index) => (
+                                        <th key={`${key}-${index}`}>{key.split("-")[1].split(":").join(" ")}</th> // Ensure key is unique
                                     ))}
                                 </tr>
                             </thead>
@@ -110,14 +102,40 @@ function Response() {
                                     <tr key={index}>
                                         <td>{index + 1}</td>
                                         <td>{valueRow.startDate}</td>
-                                        {headers.map((key) => (
-                                            <td key={key}>{valueRow[key]}</td>
+                                        {headers.map((key, idx) => (
+                                            <td key={`${key}-${idx}`}>{valueRow[key]}</td> // Ensure key is unique
                                         ))}
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     )}
+                </div>
+                
+                {/* Pie Chart for Completion Rate */}
+                <div className={styles.chartContainer}>
+                <div className={styles.card}>
+                        <p>Completion rate</p>
+                        <p>{formHits ? parseInt(formCompletion / formHits * 100) : 0} %</p>
+                    </div>
+                    <PieChart className={styles.PieChartContainer}
+                        data={[
+                            { title: 'Completed', value: completionPercentage, color: '#3B82F6' },
+                            { title: 'Remaining', value: 100 - completionPercentage, color: '#D1D5DB' }
+                        ]}
+                        lineWidth={30}
+                        radius={20}
+                        label={({ data, dataIndex }) => {
+                            const value = data && data[dataIndex] ? data[dataIndex].value : 0;
+                            return value > 0 ? `${value}%` : '';  // Only show percentage if it's greater than 0
+                        }}
+                        labelStyle={{
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            fill: '#fff',
+                            opacity: 0.75
+                        }}
+                    />
                 </div>
             </section>
         </div>

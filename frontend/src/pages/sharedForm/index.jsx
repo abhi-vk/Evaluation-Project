@@ -22,7 +22,6 @@ function SharedForm() {
     const [shareBoxIndex, setShareBoxIndex] = useState(0);
     const [disableFlagArr, setDisableFlagArr] = useState([]);
 
-    // Fetch form data by ID
     const fetchFormById = async () => {
         const data = await shareFormApi(wid);
         if (data) {
@@ -31,7 +30,6 @@ function SharedForm() {
         }
     };
 
-  
     const getInputValue = (key, value) => {
         setFormResponse((prevData) => ({
             ...prevData,
@@ -39,51 +37,59 @@ function SharedForm() {
         }));
     };
 
+    const handleButtonClick = async (key, value) => {
+        const updatedResponse = {
+            ...formResponse,
+            [key]: value || 'submitted', 
+        };
     
-    const handleButtonClick = (key) => {
-        setFormResponse((prevData) => ({
-            ...prevData,
-            [key]: 'submitted',
-        }));
-
-        
-        setIsSubmit(key); 
-    };
-
-    // Handle the form submission for each step (including button clicks)
-    const setIsSubmit = async (key, e) => {
-        e && e.preventDefault();
-        if (!key.includes("Button") && !(key in formResponse)) return; // Skip if the button isn't relevant to the current form
-
-       
-        await saveFormResponseApi(wid, formResponse); // Save response
-        console.log(formResponse);
-
+        setFormResponse(updatedResponse);
+        await saveFormResponseApi(wid, updatedResponse);
+        console.log("Button clicked data saved:", updatedResponse);
+    
         setDisableFlagArr((prevArray) => {
             const newArray = [...prevArray];
-            newArray[shareBoxIndex] = true; // Disable current button
+            newArray[shareBoxIndex] = true;
             return newArray;
         });
+    
+        setIsSubmit(key);
+    };
 
+    const setIsSubmit = async (key, e) => {
+        e && e.preventDefault();
+    
+        if (!(key in formResponse)) {
+            console.warn(`Key ${key} not found in formResponse. Skipping submission.`);
+            return;
+        }
+    
+        await saveFormResponseApi(wid, formResponse);
+        console.log("Form response saved:", formResponse);
+    
+        setDisableFlagArr((prevArray) => {
+            const newArray = [...prevArray];
+            newArray[shareBoxIndex] = true;
+            return newArray;
+        });
+    
         const n = formSequence.length;
         let idx = shareBoxIndex;
         const newItems = [];
-
-        // Move to the next question in the sequence
+    
         while (idx + 1 < n) {
             idx += 1;
             newItems.push(formSequence[idx]);
             if (formSequence[idx].data.role === 'user') {
-                break; // Stop when we reach a user input step
+                break;
             }
         }
-
+    
         setShareBox((prev) => [...prev, ...newItems]);
-        setShareBoxIndex(idx); // Update index to the next question
+        setShareBoxIndex(idx);
     };
 
     useEffect(() => {
-        // Initialize the sequence with admin steps first
         const adminItems = [];
         const n = formSequence.length;
         let idx = -1;
@@ -94,11 +100,11 @@ function SharedForm() {
             } else {
                 adminItems.push(formSequence[i]);
                 idx = i;
-                break; // Stop at the first user input step
+                break;
             }
         }
 
-        const boolArr = new Array(n).fill(false); // Disable all buttons initially
+        const boolArr = new Array(n).fill(false);
         setDisableFlagArr(boolArr);
         setShareBox(adminItems);
         setShareBoxIndex(idx);
@@ -108,7 +114,7 @@ function SharedForm() {
         if (wid) fetchFormById();
         const fromHit = async () => {
             if (hitFlag) {
-                await countFormHitApi(wid); // Increment form hit count
+                await countFormHitApi(wid);
                 setHitFlag(false);
             }
         };
