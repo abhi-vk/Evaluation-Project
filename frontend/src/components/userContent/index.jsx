@@ -4,7 +4,6 @@ import styles from './user.module.css';
 function UserContent({ item, index, getInputValue, handleButtonClick, setIsSubmit, disableFlagArr, activeRating, setActiveRating }) {
     const { type, value } = item.data;
 
-    // Handling input fields (Text, Number, Email, Phone, Date)
     if (type === 'Text' || type === 'Number' || type === 'Email' || type === 'Phone' || type === 'Date') {
         return (
             <form className={styles.inputs} onSubmit={(e) => setIsSubmit(item.key, e)}>
@@ -46,7 +45,7 @@ function UserContent({ item, index, getInputValue, handleButtonClick, setIsSubmi
             </div>
         );
     } 
-    // Handling Button inputs
+   
     else if (type === 'Button') {
         return (
             <button 
