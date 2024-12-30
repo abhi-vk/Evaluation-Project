@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../../pages/dashboard/dashboard.module.css';
+import styles from './folderButton.module.css';
 
 
 function FolderButton({ folders, onDelete }) {

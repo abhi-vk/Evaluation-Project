@@ -10,6 +10,7 @@ import FormBox from "./formBox";
 import AdminContent from "./adminContent";
 import UserContent from "./userContent";
 import CreateFormModal from "./formModal";
+import DashboardNavbar from "./dashboardNavbar";
 export{
     Navbar,
     Footer,

@@ -15,6 +15,7 @@ import {
   createFormApi,
 } from "../../services/Form";
 
+import DashboardNavbar from "../../components/dashboardNavbar"; // Importing Navbar
 import FolderButton from "../../components/folderButton";
 import FormCard from "../../components/formCard";
 import CreateFolderModal from "../../components/folderModal";
@@ -82,7 +83,6 @@ function Dashboard() {
       const data = await createFolderApi(folderName, token);
       if (data) {
         setCreateModalOpen(false);
-        // Immediately update the folder list after creation
         setAllFolder((prevFolders) => [
           ...prevFolders,
           { _id: data._id, name: folderName },
@@ -103,8 +103,7 @@ function Dashboard() {
     try {
       const data = await createFormApi(null, formName);
       if (data) {
-        // After creating the form, fetch the updated list of forms
-        fetchAllForm();  // This ensures you are working with the most up-to-date form data
+        fetchAllForm();
         setFormName("");
         setCreateFormModalOpen(false);
       }
@@ -126,7 +125,7 @@ function Dashboard() {
     try {
       const data = await fetchAllFormApi(token);
       if (data) {
-        setAllForm(data.filter((form) => !form.folderId)); // This filters out forms with a folderId
+        setAllForm(data.filter((form) => !form.folderId));
       }
     } catch (error) {
       console.error(error);
@@ -139,7 +138,6 @@ function Dashboard() {
       const data = await deleteFolderApi(folderId, token);
       if (data) {
         setDeleteModalOpen(false);
-        // Refresh the folder list after deletion
         fetchAllFolder();
       }
     } catch (error) {
@@ -152,7 +150,9 @@ function Dashboard() {
     try {
       const data = await deleteFormApi(formId);
       if (data) {
-        setAllForm((prevForms) => prevForms.filter((form) => form._id !== formId));
+        setAllForm((prevForms) =>
+          prevForms.filter((form) => form._id !== formId)
+        );
         setDeleteModalOpen(false);
       }
     } catch (error) {
@@ -187,43 +187,14 @@ function Dashboard() {
 
   return (
     <main className={styles.dashboard}>
-      <div className={styles.navbar}>
-        <div
-          className={`${styles.dropdown} ${isDropdownOpen ? styles.show : ""}`}
-        >
-          <button
-            className={styles.dropdownBtn}
-            onClick={() => setDropdownOpen(!isDropdownOpen)}
-            aria-expanded={isDropdownOpen}
-          >
-            <span>
-              {userData.username
-                ? `${userData.username}'s Workspaces`
-                : "Workspaces"}
-            </span>
-            <img
-              className={styles.arrowDown}
-              src="/icons/arrow-angle-down.png"
-              alt="arrow-down icon"
-            />
-          </button>
-          <div className={styles.dropdownContent}>
-            {userData?.workspaces?.length > 0 ? (
-              userData.workspaces.map((workspace) => (
-                <div key={workspace._id} className={styles.workspaceItem}>
-                  <span>{workspace.name}</span>
-                </div>
-              ))
-            ) : (
-              <span className={styles.noWorkspace}>No workspaces found</span>
-            )}
-            <Link to="/settings">Settings</Link>
-            <button onClick={handleLogout} className={styles.logout}>
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
+     <DashboardNavbar
+  userData={userData}
+  handleLogout={handleLogout}
+  isDropdownOpen={isDropdownOpen}
+  setDropdownOpen={setDropdownOpen}
+/>
+
+
       <div className={styles.section}>
         <div className={styles.folders}>
           <button className={styles.createOpen} onClick={openCreateModal}>

@@ -1,0 +1,151 @@
+.navbar {
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  margin-bottom: 2rem;
+  background-color: var(--primary-bg);
+}
+
+.dropdown {
+  position: relative;
+  font-weight: normal;
+  margin: 0 15rem 0 30rem; /* Center the dropdown */
+}
+
+.dropdownBtn {
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.arrowDown {
+  font-size: 12px;
+  margin-left: 10px;
+  transition: transform 0.3s;
+}
+
+.dropdownContent {
+  background: var(--primary-bg);
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.dropdownContent a {
+  color: #fff;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdownContent span {
+  color: #fff;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdownContent .logout {
+  color: #FFA54C;
+  padding: 10px 16px;
+  background: var(--primary-bg);
+  text-decoration: none;
+  display: block;
+}
+
+.show .dropdownContent {
+  display: block;
+}
+
+.show .arrowDown {
+  transform: rotate(180deg);
+}
+.remainingContainer{
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.shareButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+}
+
+.shareButton:hover {
+  background-color: #0056b3;
+}
+
+
+
+
