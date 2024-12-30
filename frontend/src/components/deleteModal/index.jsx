@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../../pages/dashboard/dashboard.module.css';
+import styles from './deleteModal.module.css';
 
 function DeleteModal({ entityType, onDelete, onClose }) {
     return (

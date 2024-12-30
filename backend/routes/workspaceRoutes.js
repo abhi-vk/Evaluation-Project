@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const verifyToken = require('../middlewares/verifyToken'); // Middleware to authenticate user
-const { inviteUser } = require('../controllers/Workspace');
+const { inviteUser, switchWorkspace } = require('../controllers/workspaceController');
 
 // Route to invite a user
 router.post('/workspace/invite', verifyToken, inviteUser);

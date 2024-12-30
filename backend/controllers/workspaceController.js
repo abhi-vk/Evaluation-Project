@@ -1,6 +1,8 @@
+const mongoose = require('mongoose');  // Import mongoose
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { ObjectId } = mongoose.Types;
+const { ObjectId } = mongoose.Types;  // Use mongoose.Types.ObjectId for ObjectId manipulation
+
 const User = require('../models/User');
 const Workspace = require('../models/Workspace');
 
@@ -63,7 +65,6 @@ const inviteUser = async (req, res, next) => {
     }
 };
 
-
 const switchWorkspace = async (req, res, next) => {
     try {
         const { workspaceId } = req.body; // Frontend sends workspaceId in request body
@@ -106,4 +107,5 @@ const switchWorkspace = async (req, res, next) => {
         next(err);
     }
 };
-module.exports = { inviteUser,switchWorkspace };
+
+module.exports = { inviteUser, switchWorkspace };

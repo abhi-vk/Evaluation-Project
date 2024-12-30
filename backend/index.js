@@ -7,6 +7,8 @@ const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const folderRoutes = require('./routes/folderRoutes');
 const formRoutes = require('./routes/formRoutes');
+const workspaceRoutes = require('./routes/workspaceRoutes');
+
 
 const errorHandler = require('./middlewares/errorHandler');
 
@@ -20,7 +22,7 @@ app.use(bodyParser.json());
 app.use(userRoutes);
 app.use(folderRoutes);
 app.use(formRoutes);
-
+app.use(workspaceRoutes);
 app.get('/', (req, res) => {
     res.status(200).send({ status: "success", msg: "API is working well." });
 })

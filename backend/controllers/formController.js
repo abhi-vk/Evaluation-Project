@@ -17,18 +17,33 @@ const validateFormData = async (formId) => {
     return formdata;
 };
 
+// Check if User Has Edit Permissions
+const hasEditPermissions = (workspace, userId) => {
+    const member = workspace.members.find(member => member.userId.toString() === userId.toString());
+    return member && (member.permission === 'edit' || workspace.owner.toString() === userId.toString());
+};
+
 // Create a new form and update the workspace
 const createForm = async (req, res, next) => {
     try {
         const { folderId, formName } = req.body;
-
-        // Fetch workspaceId from req.activeWorkspaceId
         const workspaceId = req.activeWorkspaceId;
+        const userId = req.user; // Extracted from JWT token
+
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
         if (!ObjectId.isValid(workspaceId)) throw Object.assign(Error("Invalid Workspace ID."), { code: 400 });
 
         // Validate input
         if (!formName) throw Object.assign(Error("Please enter a form name."), { code: 400 });
+
+        // Validate Workspace
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) throw Object.assign(Error("Workspace not found."), { code: 404 });
+
+        // Check User Permission
+        if (!hasEditPermissions(workspace, userId)) {
+            throw Object.assign(Error("You do not have permission to create forms."), { code: 403 });
+        }
 
         // Create the form
         const newForm = await Form.create({ workspaceId, folderId, formName, formTheme: "#ffffff" });
@@ -53,7 +68,6 @@ const createForm = async (req, res, next) => {
 // Fetch all forms for a workspace
 const fetchAllForm = async (req, res, next) => {
     try {
-        // Fetch workspaceId from req.activeWorkspaceId
         const workspaceId = req.activeWorkspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
         if (!ObjectId.isValid(workspaceId)) throw Object.assign(Error("Invalid Workspace ID."), { code: 400 });
@@ -83,6 +97,19 @@ const updateForm = async (req, res, next) => {
         await validateFormData(formId);
 
         const { formName, formTheme, formSequence } = req.body;
+
+        const workspaceId = req.activeWorkspaceId;
+        const userId = req.user; // Extracted from JWT token
+
+        // Validate Workspace
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) throw Object.assign(Error("Workspace not found."), { code: 404 });
+
+        // Check User Permission
+        if (!hasEditPermissions(workspace, userId)) {
+            throw Object.assign(Error("You do not have permission to update forms."), { code: 403 });
+        }
+
         await Form.findByIdAndUpdate(formId, { formName, formTheme, formSequence });
         res.status(200).json({ status: "success", msg: "Form updated successfully." });
     } catch (err) {
@@ -96,9 +123,19 @@ const deleteForm = async (req, res, next) => {
     try {
         const formdata = await validateFormData(formId);
 
-        // Fetch workspaceId from the form data
         const workspaceId = formdata.workspaceId;
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required for deletion."), { code: 400 });
+
+        // Validate Workspace
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) throw Object.assign(Error("Workspace not found."), { code: 404 });
+
+        const userId = req.user; // Extracted from JWT token
+
+        // Check User Permission
+        if (!hasEditPermissions(workspace, userId)) {
+            throw Object.assign(Error("You do not have permission to delete forms."), { code: 403 });
+        }
 
         // Remove the form from the workspace's forms array
         await Workspace.findByIdAndUpdate(

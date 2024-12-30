@@ -18,11 +18,18 @@ const validateFolderData = async (folderId, workspaceId) => {
     return folderdata;
 };
 
+// Check if User Has Edit Permissions
+const hasEditPermissions = (workspace, userId) => {
+    const member = workspace.members.find(member => member.userId.toString() === userId.toString());
+    return member && (member.permission === 'edit' || workspace.owner.toString() === userId.toString());
+};
+
 // Create Folder
 const createFolder = async (req, res, next) => {
     try {
         const { folderName } = req.body;
         const workspaceId = req.activeWorkspaceId;
+        const userId = req.user; // Extracted from JWT token
 
         if (!folderName) throw Object.assign(Error("Please enter folder name."), { code: 400 });
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
@@ -30,6 +37,11 @@ const createFolder = async (req, res, next) => {
         // Validate Workspace
         const workspace = await Workspace.findById(workspaceId);
         if (!workspace) throw Object.assign(Error("Workspace not found."), { code: 404 });
+
+        // Check User Permission
+        if (!hasEditPermissions(workspace, userId)) {
+            throw Object.assign(Error("You do not have permission to create folders."), { code: 403 });
+        }
 
         // Create Folder
         const newFolder = await Folder.create({ folderName, workspaceId });
@@ -78,9 +90,19 @@ const deleteFolder = async (req, res, next) => {
     const { folderId } = req.params;
     try {
         const workspaceId = req.activeWorkspaceId;
+        const userId = req.user; // Extracted from JWT token
+
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
 
         const folder = await validateFolderData(folderId, workspaceId);
+
+        // Validate User Permissions
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) throw Object.assign(Error("Workspace not found."), { code: 404 });
+
+        if (!hasEditPermissions(workspace, userId)) {
+            throw Object.assign(Error("You do not have permission to delete folders."), { code: 403 });
+        }
 
         // Delete Folder
         await Folder.findByIdAndDelete(folderId);

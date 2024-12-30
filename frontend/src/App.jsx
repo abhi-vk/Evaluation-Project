@@ -18,6 +18,7 @@ function App() {
       <Route path='/folder/:fid' element={<Folders />} />
       <Route path='/settings' element={<Settings />} />
       <Route path='/workspace' element={<Workspace />} />
+      <Route path="/workspace/:workspaceId/edit" element={<Dashboard/>} />
       <Route path='/response' element={<Response />} />
       <Route path='/share/:wid' element={<SharedForm/>} />
     </Routes>
