@@ -9,6 +9,7 @@ import WorkspaceNavbar from "./workspaceNavbar";
 import FormBox from "./formBox";
 import AdminContent from "./adminContent";
 import UserContent from "./userContent";
+import CreateFormModal from "./formModal";
 export{
     Navbar,
     Footer,
@@ -20,5 +21,6 @@ export{
     WorkspaceNavbar,
     FormBox,
     AdminContent,
-    UserContent
+    UserContent, 
+    CreateFormModal
 }

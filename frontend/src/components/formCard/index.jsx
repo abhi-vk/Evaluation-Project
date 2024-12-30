@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styles from '../../pages/dashboard/dashboard.module.css';
+import styles from './formCard.module.css';
 
 
 function FormCard({ forms, onDelete }) {

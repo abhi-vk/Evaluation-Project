@@ -1,0 +1,45 @@
+.createFormModal,
+.deleteFolderModal {
+    background: var(--primary-bg);
+    width: 300px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.createFormModal .inputs {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deleteFormModal {
+    width: 230px;
+    text-align: center;
+    gap: 25px;
+}
+
+.createFormModal input {
+    border: none !important;
+    background: #1F1F23 !important;
+}
+
+.action {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    cursor: pointer;
+}
+
+.action .confirm {
+    color: var(--accent-color);
+}
+
+.action span:nth-child(2) {
+    border-left: 1px solid var(--border-color);
+    height: 25px;
+}

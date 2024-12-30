@@ -31,7 +31,7 @@ const isValidFolderId = (folderId) => {
 };
 
 // Create Form
-export const createFormApi = async (folderId, formName) => {
+export const createFormApi = async (folderId, formName, token) => {
     try {
         const body = folderId ? { folderId, formName } : { formName };
         const response = await fetch(`${baseURL}/form/create`, {
@@ -41,11 +41,24 @@ export const createFormApi = async (folderId, formName) => {
         });
 
         const data = await response.json();
-        return handleApiResponse(data, 'Form created successfully');
+        console.log("API response JSON:", data);
+
+        if (response.ok) {
+            return {
+                formId: data.formId,
+                msg: data.msg
+            };
+        } else {
+            console.error("API call failed", response.status, response.statusText);
+            return null;
+        }
     } catch (error) {
+        console.error("Error in API call:", error);
         handleApiErr(error);
+        return null;
     }
 };
+
 
 // Fetch All Forms
 export const fetchAllFormApi = async (token, navigate) => {

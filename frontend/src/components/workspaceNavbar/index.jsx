@@ -25,11 +25,14 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
             return;
         }
 
-        const newFormId = await createFormApi(folderId, formName, token);
-        if (newFormId && newFormId !== formId) {  // Prevent redundant updates
+        const response = await createFormApi(folderId, formName, token);
+        if (response && response.formId) {
+            const newFormId = response.formId;
             setFormId(newFormId);
-            setWorkspaceId(newFormId);  // Pass the new form ID to the parent
+            setWorkspaceId(newFormId);  // Pass the new formId to the parent
             navigate(`/workspace?wid=${newFormId}`);  // Navigate to the new workspace
+        } else {
+            toast.error("Form creation failed. Please try again.");
         }
     };
 
@@ -40,6 +43,8 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
             setFormName(data.formName);
             setFormSequence(data.formSequence);
             setHasFetched(true); // Mark as fetched
+        } else {
+            toast.error("Failed to fetch form data.");
         }
     };
 
