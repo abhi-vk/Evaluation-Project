@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../../auth/useAuth";
 import { userDashboardApi } from "../../services/User";
-import { useParams, useLocation } from "react-router-dom"; // Import hooks
+import { useParams, useLocation } from "react-router-dom"; 
 import styles from "./dashboard.module.css";
 
 import {
@@ -15,18 +15,18 @@ import {
   createFormApi,
 } from "../../services/Form";
 
-import DashboardNavbar from "../../components/dashboardNavbar"; // Importing Navbar
+import DashboardNavbar from "../../components/dashboardNavbar"; 
 import FolderButton from "../../components/folderButton";
 import FormCard from "../../components/formCard";
 import CreateFolderModal from "../../components/folderModal";
 import DeleteModal from "../../components/deleteModal";
 import CreateFormModal from "../../components/formModal";
-import { toast } from "react-toastify"; // Import toast for notifications
+import { toast } from "react-toastify"; 
 
 function Dashboard() {
   const token = useAuth();
-  const { workspaceId } = useParams(); // Get workspaceId from URL
-  const location = useLocation(); // Use to get query parameters
+  const { workspaceId } = useParams();
+  const location = useLocation(); 
   const [userData, setUserData] = useState({});
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [allFolder, setAllFolder] = useState([]);
@@ -43,9 +43,8 @@ function Dashboard() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDataFetched, setIsDataFetched] = useState(false);
   const [entityType, setEntityType] = useState(null);
-  const [currentWorkspace, setCurrentWorkspace] = useState(null); // Added to track the current workspace
+  const [currentWorkspace, setCurrentWorkspace] = useState(null); 
 
-  // Extract query params (e.g., 'permission')
   const urlParams = new URLSearchParams(location.search);
   const permission = urlParams.get("permission");
 
@@ -79,31 +78,31 @@ function Dashboard() {
 
   // Function to create folder
   const createFolder = async () => {
-    setFolderNameError("");
+    setFolderNameError('');
+    
     if (folderName.trim().length === 0) {
-      setFolderNameError("Enter folder name");
-      return;
+        setFolderNameError('Enter folder name');
+        return;
     }
 
     try {
-      const data = await createFolderApi(folderName, token);
-      if (data) {
-        setCreateModalOpen(false);
-        setAllFolder((prevFolders) => [
-          ...prevFolders,
-          { _id: data._id, name: folderName },
-        ]);
-        toast.success("Folder created successfully!");
-      }
+        const data = await createFolderApi(folderName, token);
+        if (data) {
+            setCreateModalOpen(false); // Close the modal
+            await fetchAllFolder(); // Refresh the folder list
+            toast.success("Folder created successfully!"); // Notify the user
+        }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.status === 403) {
-        toast.error("You do not have permission to create folders.");
-      } else {
-        toast.error("You do not have permission to delete forms.");
-      }
+        console.error(error);
+        if (error.response && error.response.status === 403) {
+            toast.error("You do not have permission to create folders.");
+        } else {
+            toast.error("An error occurred while creating the folder.");
+        }
     }
-  };
+};
+
+
 
   // Function to create form
   const createForm = async () => {
@@ -126,7 +125,7 @@ function Dashboard() {
       if (error.response && error.response.status === 403) {
         toast.error("You do not have permission to create forms.");
       } else {
-        toast.error("You do not have permission to delete forms.");
+        toast.error("An error occurred while creating the form.");
       }
     }
   };
@@ -160,16 +159,14 @@ function Dashboard() {
       const data = await deleteFolderApi(folderId, token);
       if (data) {
         setDeleteModalOpen(false);
-        fetchAllFolder();
+        setAllFolder((prevFolders) =>
+          prevFolders.filter((folder) => folder._id !== folderId)
+        );
         toast.success("Folder deleted successfully!");
       }
     } catch (error) {
       console.error(error);
-      if (error.response && error.response.status === 403) {
-        toast.error("You do not have permission to delete folders.");
-      } else {
-        toast.error("You do not have permission to delete forms.");
-      }
+      toast.error("An error occurred while deleting the folder.");
     }
   };
 
@@ -186,11 +183,8 @@ function Dashboard() {
         toast.success("Form deleted successfully!");
       }
     } catch (error) {
-      if (error.response && error.response.status === 403) {
-        toast.error("You do not have permission to delete forms.");
-      } else {
-        toast.error("You do not have permission to delete forms.");
-      }
+      console.error(error);
+      toast.error("An error occurred while deleting the form.");
     }
   };
 
@@ -218,7 +212,6 @@ function Dashboard() {
   // Handle workspace switch
   const handleWorkspaceSwitch = (workspace) => {
     setCurrentWorkspace(workspace);
-    // Fetch folder and form data for the selected workspace
     fetchAllFolder();
     fetchAllForm();
   };
@@ -231,10 +224,8 @@ function Dashboard() {
 
   useEffect(() => {
     if (workspaceId) {
-      // Handle workspace switching and other logic when workspaceId is available
       console.log("Workspace ID from URL:", workspaceId);
       console.log("Permission from URL:", permission);
-      // You can perform any necessary actions like fetching data based on the workspaceId here
     }
   }, [workspaceId, permission]);
 
@@ -245,12 +236,11 @@ function Dashboard() {
         handleLogout={handleLogout}
         isDropdownOpen={isDropdownOpen}
         setDropdownOpen={setDropdownOpen}
-        onWorkspaceSwitch={handleWorkspaceSwitch} // Pass workspace switch handler
+        onWorkspaceSwitch={handleWorkspaceSwitch}
       />
 
       <div className={styles.section}>
         <div className={styles.folders}>
-          {/* Disable folder creation if permission is 'view' */}
           {permission !== "view" && (
             <button className={styles.createOpen} onClick={openCreateModal}>
               <img src="/icons/folder-create.png" alt="folder icon" />
@@ -263,7 +253,6 @@ function Dashboard() {
           />
         </div>
         <div className={styles.forms}>
-          {/* Disable form creation if permission is 'view' */}
           {permission !== "view" && (
             <button className={styles.card} onClick={openCreateFormModal}>
               <img src="/icons/plus.png" alt="plus icon" />

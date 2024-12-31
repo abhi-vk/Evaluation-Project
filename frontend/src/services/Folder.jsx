@@ -33,17 +33,25 @@ const getAuthHeaders = () => {
 // Create Folder API
 export const createFolderApi = async (folderName) => {
     try {
+        console.log("Request to create folder:", folderName);
+
         const response = await fetch(`${baseURL}/folder/create`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({ folderName }),
         });
 
+        console.log("Response Status:", response.status);
+        const responseBody = await response.clone().json();
+        console.log("Response Body:", responseBody);
+
         return handleApiResponse(response, 'Folder created successfully');
     } catch (error) {
+        console.error("Error in createFolderApi:", error);
         handleApiErr(error);
     }
 };
+
 
 // Fetch All Folders
 export const fetchAllFolderApi = async () => {
