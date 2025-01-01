@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import useAuth from "../../auth/useAuth";
 import { userDashboardApi } from "../../services/User";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import styles from "./dashboard.module.css";
+import styles from "../../assets/dashboard.module.css";
 
 import {
   createFolderApi,

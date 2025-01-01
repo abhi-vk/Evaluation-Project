@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './folderModal.module.css';
+import styles from "../../assets/dashboard.module.css";
 
 
 function CreateFolderModal({ folderName, folderNameError, onNameChange, onCreate, onClose }) {

@@ -6,7 +6,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #18181B;
+    background: var(--secondary-bg); /* Adapted for both themes */
     padding: 10px 20px;
     box-sizing: border-box;
     z-index: 1;
@@ -16,7 +16,8 @@
     padding: 5px 10px !important;
     border: none !important;
     border-radius: 5px !important;
-    background: #37373E !important;
+    background: var(--primary-bg) !important; /* Adapted for both themes */
+    color: var(--dark-text); /* Adapted for both themes */
 }
 
 .formNav,
@@ -28,16 +29,17 @@
 
 .formNav a,
 .formAction a {
-    color: #fff;
+    color: var(--dark-text); /* Adapted for both themes */
     display: flex;
     border: 1px solid transparent;
     border-radius: 5px;
     padding: 5px 10px;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
 }
 
 .formNav .active {
-    border: 1px solid #7EA6FF;
-    color: #7EA6FF;
+    border: 1px solid var(--accent-color); /* Highlighted link for both themes */
+    color: var(--accent-color);
 }
 
 .formAction {
@@ -48,12 +50,25 @@
     padding: 5px 20px;
     font-weight: normal;
     display: flex;
+    background: var(--accent-color); /* Default button background */
+    color: white; /* Text color for better visibility */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
 .formAction button:disabled {
-    background: #848890;
+    background: #848890; /* Disabled button background color */
+    color: var(--light-text); /* Disabled button text color */
+    cursor: not-allowed;
 }
 
 .formAction button:nth-child(2) {
-    background: #4ADE80CC;
+    background: var(--accent-color); /* Highlighted button */
+    color: white; /* Adapted for both themes */
+}
+
+.formAction button:hover:not(:disabled) {
+    background: #0056b3; /* Slightly darker on hover for emphasis */
 }

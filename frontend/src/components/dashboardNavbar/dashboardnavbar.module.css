@@ -5,7 +5,7 @@
   align-items: center;
   padding: 10px 20px;
   margin-bottom: 2rem;
-  background-color: var(--primary-bg);
+  background-color: var(--primary-bg); /* Adapts to active theme */
 }
 
 .dropdown {
@@ -16,7 +16,8 @@
 
 .dropdownBtn {
   border: 1px solid var(--border-color);
-  background-color: transparent;
+  background-color: var(--secondary-bg); /* Adapts to active theme */
+  color: var(--dark-text); /* Ensure readability in all themes */
   display: flex;
   align-items: center;
   gap: 10px;
@@ -33,7 +34,7 @@
 }
 
 .dropdownContent {
-  background: var(--primary-bg);
+  background: var(--primary-bg); /* Adapts to active theme */
   display: none;
   position: absolute;
   top: 100%;
@@ -45,15 +46,9 @@
   border-radius: 0 0 4px 4px;
 }
 
-.dropdownContent a {
-  color: #fff;
-  padding: 10px 16px;
-  text-decoration: none;
-  display: block;
-}
-
+.dropdownContent a,
 .dropdownContent span {
-  color: #fff;
+  color: var(--dark-text); /* Ensure readability in all themes */
   padding: 10px 16px;
   text-decoration: none;
   display: block;
@@ -62,7 +57,7 @@
 .dropdownContent .logout {
   color: #FFA54C;
   padding: 10px 16px;
-  background: var(--primary-bg);
+  background: var(--primary-bg); /* Adapts to active theme */
   text-decoration: none;
   display: block;
 }
@@ -73,8 +68,16 @@
 
 .show .arrowDown {
   transform: rotate(180deg);
+  color: black;
 }
-.remainingContainer{
+.arrowDown {
+  font-size: 12px;
+  margin-left: 10px;
+   /* Adapts to active theme */
+  transition: transform 0.3s;
+}
+
+.remainingContainer {
   display: flex;
   justify-content: space-between;
   gap: 2rem;
@@ -106,7 +109,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--border-color); /* Adapts to active theme */
   transition: 0.4s;
   border-radius: 34px;
 }
@@ -118,13 +121,13 @@
   width: 14px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: var(--dark-text); /* Ensure visibility in all themes */
   transition: 0.4s;
   border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: #0056b3;
+  background-color: var(--accent-color); /* Matches active theme accent */
 }
 
 input:checked + .slider:before {
@@ -132,8 +135,8 @@ input:checked + .slider:before {
 }
 
 .shareButton {
-  background-color:#0056b3;
-  color: white;
+  background-color: var(--accent-color); /* Matches active theme accent */
+  color: white; /* Ensure readability in all themes */
   border: none;
   padding: 8px 16px;
   border-radius: 5px;
@@ -143,9 +146,8 @@ input:checked + .slider:before {
 }
 
 .shareButton:hover {
-  background-color: #0056b3;
+  background-color: var(--accent-color); /* Matches active theme accent */
 }
-
 
 .modalOverlay {
   position: fixed;
@@ -161,8 +163,8 @@ input:checked + .slider:before {
 }
 
 .modal {
-  background: #1c1c1e;
-  color: #fff;
+  background: var(--secondary-bg); /* Adapts to active theme */
+  color: var(--dark-text); /* Ensure readability in all themes */
   padding: 0 25px 20px 30px;
   border-radius: 8px;
   width: 600px;
@@ -184,31 +186,22 @@ input:checked + .slider:before {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color); /* Adapts to active theme */
   border-radius: 4px;
-  background: #2c2c2e;
-  color: #fff;
+  background: var(--secondary-bg); /* Adapts to active theme */
+  color: var(--dark-text); /* Ensure readability in all themes */
 }
 
-.primaryButton {
+.primaryButton,
+.secondaryButton {
   width: 100%;
-  background-color: #0056b3;
+  background-color: var(--accent-color); /* Matches active theme accent */
   border: none;
-  color: #fff;
+  color: white; /* Ensure readability in all themes */
   padding: 10px;
   border-radius: 4px;
   cursor: pointer;
   margin-bottom: 20px;
-}
-
-.secondaryButton {
-  width: 100%;
-  background-color: #0056b3;
-  border: none;
-  color: #fff;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .closeButton {
@@ -230,9 +223,9 @@ input:checked + .slider:before {
 }
 
 .dropdownMenu {
-  background: #2c2c2e;
-  border: 1px solid #444;
-  color: #fff;
+  background: var(--secondary-bg); /* Adapts to active theme */
+  border: 1px solid var(--border-color); /* Adapts to active theme */
+  color: var(--dark-text); /* Ensure readability in all themes */
   border-radius: 4px;
   padding: 5px;
 }
@@ -240,4 +233,3 @@ input:checked + .slider:before {
 .workspaceItem {
   cursor: pointer; /* Ensure that the workspace items are clickable */
 }
-

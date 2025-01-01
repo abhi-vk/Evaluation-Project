@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { inviteUserApi, switchWorkspaceApi, generateInviteLinkApi } from "../../services/Workspace"; // Import workspace APIs
-import { toast } from "react-toastify"; // For user feedback
+import { inviteUserApi, switchWorkspaceApi, generateInviteLinkApi } from "../../services/Workspace";
+import { toast } from "react-toastify";
 import styles from "./dashboardnavbar.module.css";
 
 function DashboardNavbar({
@@ -9,18 +9,31 @@ function DashboardNavbar({
   isDropdownOpen,
   setDropdownOpen,
   handleLogout,
-  onWorkspaceSwitch, // Callback to notify parent component of workspace switch
+  onWorkspaceSwitch,
 }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [inviteeEmail, setInviteeEmail] = useState("");
-  const [permission, setPermission] = useState("edit"); // Default permission
-  const [isProcessing, setIsProcessing] = useState(false); // For button loading state
+  const [permission, setPermission] = useState("edit");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState(
-    userData?.workspaces?.[0] || null // Default to the first workspace
+    userData?.workspaces?.[0] || null
   );
-  const [inviteLink, setInviteLink] = useState(""); // State to store the invite link
+  const [inviteLink, setInviteLink] = useState("");
 
-  // Load the current workspace from localStorage if it exists
+  // Theme state
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+
+  // Initialize the theme on first render
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+  };
+
   useEffect(() => {
     const savedWorkspace = JSON.parse(localStorage.getItem("currentWorkspace"));
     if (savedWorkspace) {
@@ -28,7 +41,6 @@ function DashboardNavbar({
     }
   }, []);
 
-  // Save the current workspace to localStorage whenever it changes
   useEffect(() => {
     if (currentWorkspace) {
       localStorage.setItem("currentWorkspace", JSON.stringify(currentWorkspace));
@@ -41,13 +53,13 @@ function DashboardNavbar({
       return;
     }
 
-    setIsProcessing(true); // Disable button while processing
+    setIsProcessing(true);
     try {
       const success = await inviteUserApi(inviteeEmail, permission, () => {});
       if (success) {
         toast.success("Invite sent successfully.");
-        setInviteeEmail(""); // Clear the input field
-        setModalOpen(false); // Close the modal
+        setInviteeEmail("");
+        setModalOpen(false);
       }
     } catch (error) {
       console.error(error);
@@ -62,8 +74,8 @@ function DashboardNavbar({
       const updatedWorkspace = await switchWorkspaceApi(workspace._id, () => {});
       if (updatedWorkspace) {
         toast.success(`Switched to workspace: ${workspace.name}`);
-        setCurrentWorkspace(workspace); // Update the current workspace
-        onWorkspaceSwitch(workspace); // Notify parent component of workspace switch
+        setCurrentWorkspace(workspace);
+        onWorkspaceSwitch(workspace);
       }
     } catch (error) {
       console.error(error);
@@ -74,7 +86,7 @@ function DashboardNavbar({
   const handleGenerateInviteLink = async () => {
     try {
       const link = await generateInviteLinkApi(() => {});
-      setInviteLink(link); // Set the invite link
+      setInviteLink(link);
       toast.success("Invite link generated successfully.");
     } catch (error) {
       console.error(error);
@@ -87,12 +99,15 @@ function DashboardNavbar({
       toast.error("No invite link to copy.");
       return;
     }
-    navigator.clipboard.writeText(inviteLink).then(() => {
-      toast.success("Invite link copied to clipboard.");
-    }).catch((err) => {
-      console.error("Failed to copy link:", err);
-      toast.error("Failed to copy link.");
-    });
+    navigator.clipboard
+      .writeText(inviteLink)
+      .then(() => {
+        toast.success("Invite link copied to clipboard.");
+      })
+      .catch((err) => {
+        console.error("Failed to copy link:", err);
+        toast.error("Failed to copy link.");
+      });
   };
 
   return (
@@ -123,7 +138,7 @@ function DashboardNavbar({
             <div
               key={workspace._id}
               className={styles.workspaceItem}
-              onClick={() => handleSwitchWorkspace(workspace)} // Switch workspace
+              onClick={() => handleSwitchWorkspace(workspace)}
             >
               <span>{workspace.name}'s workspace</span>
             </div>
@@ -138,7 +153,11 @@ function DashboardNavbar({
         <div className={styles.toggleContainer}>
           <span>Light</span>
           <label className={styles.switch}>
-            <input type="checkbox" />
+            <input
+              type="checkbox"
+              checked={theme === "dark"}
+              onChange={toggleTheme}
+            />
             <span className={styles.slider}></span>
           </label>
           <span>Dark</span>

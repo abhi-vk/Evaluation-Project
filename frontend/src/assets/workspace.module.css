@@ -1,5 +1,5 @@
 .space {
-    background: #1F1F23;
+    background: var(--primary-bg); 
     overflow-y: auto;
 }
 
@@ -7,7 +7,7 @@
     position: fixed;
     margin: 80px 0 20px 20px;
     padding: 20px;
-    background: #18181B;
+    background: var(--secondary-bg); 
     width: 350px;
     height: calc(100vh - 150px);
     border: 1px solid var(--border-color);
@@ -24,8 +24,8 @@
 
 .sidebar button {
     font-weight: normal;
-    background: #27272A;
-    color: var(--dark-text);
+    background: var(--third-bg); 
+    color: var(--dark-text); 
     display: flex;
     align-items: center;
     gap: 15px;
@@ -54,7 +54,7 @@
     width: 350px;
     padding: 20px;
     border-radius: 10px;
-    background: #18181B;
+    background: var(--secondary-bg); 
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -69,11 +69,12 @@
 .card .title {
     font-weight: 600;
     font-size: 18px;
+    color: var(--dark-text); 
 }
 
 .card .hintText {
     font-size: 16px;
-    color: #555555;
+    color: var(--light-text); 
     font-weight: 600;
 }
 
@@ -81,7 +82,8 @@
     position: absolute;
     top: -15px;
     right: -15px;
-    background: #444444;
+    background: var(--third-bg); 
+    color: var(--dark-text); 
     height: 35px;
     width: 35px;
     display: flex;
@@ -104,22 +106,22 @@
 
 .inputBox input {
     padding: 10px 40px !important;
-    background: #1F1F23 !important;
+    background: var(--third-bg) !important; 
     border: none !important;
     border-radius: 5px !important;
+    color: var(--dark-text); 
 }
+
 .note {
-    color: red; /* Note text in red */
+    color: var(--accent-color); /* Accent color for the note */
     font-size: 16px;
     margin-top: 15px;
-
 }
 
 .note strong {
-    color: red; 
+    color: var(--accent-color);
     font-size: 18px;
     font-weight: 700;
-    
 }
 
 .note ul {
@@ -128,8 +130,7 @@
 }
 
 .note li {
-    color: white; /* Points in black */
+    color: var(--dark-text); /* Points adapt to theme */
     font-style: italic;
     margin-bottom: 5px;
 }
-

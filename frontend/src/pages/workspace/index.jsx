@@ -7,7 +7,8 @@ import { fetchFormByIdApi, updateFormApi } from "../../services/Form";
 import { WorkspaceNavbar } from "../../components";
 import { FormBox } from "../../components";
 
-import styles from "./workspace.module.css";
+import styles from '../../assets/workspace.module.css';
+
 
 function Workspace() {
   const token = useAuth();

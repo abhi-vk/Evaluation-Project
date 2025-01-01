@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './formBox.module.css';
+import styles from '../../assets/workspace.module.css';
 
 function FormBox({ button, index, handleRemoveBox, getFormBoxValue, formBoxError }) {
     const { role, src, type, hint, value } = button.data;

@@ -3,7 +3,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #69696973;
+    color: var(--light-text); /* Adapted for both themes */
 }
 
 .content {
@@ -22,7 +22,7 @@
 .brief .card {
     width: 200px;
     height: 60px;
-    background: #323232;
+    background: var(--secondary-bg); /* Adapted for both themes */
     padding: 20px;
     border-radius: 10px;
     display: flex;
@@ -30,10 +30,11 @@
     justify-content: center;
     align-items: start;
     gap: 5px;
+    color: var(--dark-text); /* Adapted for both themes */
 }
 
 .brief .card p {
-    color: #fff;
+    color: var(--dark-text); /* Adapted for both themes */
 }
 
 .tableContainer {
@@ -48,7 +49,7 @@
 }
 
 .table th {
-    color: #fff !important;
+    color: var(--dark-text); /* Adapted for both themes */
     font-weight: 500;
 }
 
@@ -58,7 +59,7 @@
     padding: 10px 16px;
     text-align: left;
     border: 1px solid var(--border-color);
-    color: var(--dark-text);
+    color: var(--dark-text); /* Adapted for both themes */
 }
 
 .chartContainer {
@@ -69,14 +70,16 @@
     flex-direction: column;
     padding: 10px; 
 }
-.PieChartContainer{
- width: 300px;
- height: 300px;
+
+.PieChartContainer {
+    width: 300px;
+    height: 300px;
 }
+
 .card {
     width: 200px;
     height: 60px;
-    background: #323232;
+    background: var(--secondary-bg); /* Adapted for both themes */
     padding: 20px;
     border-radius: 10px;
     display: flex;
@@ -84,8 +87,9 @@
     justify-content: center;
     align-items: start;
     gap: 5px;
+    color: var(--dark-text); /* Adapted for both themes */
 }
 
 .card p {
-    color: #fff;
+    color: var(--dark-text); /* Adapted for both themes */
 }

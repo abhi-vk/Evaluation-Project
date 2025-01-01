@@ -7,8 +7,7 @@ import { deleteFormApi, createFormApi } from '../../services/Form';
 import FormCard from '../../components/formCard';
 import DeleteModal from '../../components/deleteModal';
 import CreateFormModal from '../../components/formModal';
-
-import styles from './folder.module.css';
+import styles from "../../assets/dashboard.module.css";
 
 function Folders() {
     const rawToken = useAuth();
