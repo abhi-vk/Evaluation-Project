@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { inviteUserApi, switchWorkspaceApi } from "../../services/Workspace"; // Import workspace APIs
+import { inviteUserApi, switchWorkspaceApi, generateInviteLinkApi } from "../../services/Workspace"; // Import workspace APIs
 import { toast } from "react-toastify"; // For user feedback
 import styles from "./dashboardnavbar.module.css";
 
@@ -18,6 +18,7 @@ function DashboardNavbar({
   const [currentWorkspace, setCurrentWorkspace] = useState(
     userData?.workspaces?.[0] || null // Default to the first workspace
   );
+  const [inviteLink, setInviteLink] = useState(""); // State to store the invite link
 
   // Load the current workspace from localStorage if it exists
   useEffect(() => {
@@ -70,6 +71,30 @@ function DashboardNavbar({
     }
   };
 
+  const handleGenerateInviteLink = async () => {
+    try {
+      const link = await generateInviteLinkApi(() => {});
+      setInviteLink(link); // Set the invite link
+      toast.success("Invite link generated successfully.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate invite link.");
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!inviteLink) {
+      toast.error("No invite link to copy.");
+      return;
+    }
+    navigator.clipboard.writeText(inviteLink).then(() => {
+      toast.success("Invite link copied to clipboard.");
+    }).catch((err) => {
+      console.error("Failed to copy link:", err);
+      toast.error("Failed to copy link.");
+    });
+  };
+
   return (
     <div className={styles.navbar}>
       <div
@@ -80,8 +105,13 @@ function DashboardNavbar({
           onClick={() => setDropdownOpen(!isDropdownOpen)}
           aria-expanded={isDropdownOpen}
         >
-          <span>{`${currentWorkspace?.name}'s workspace` || `${userData.username}'s workspace` || "Workspaces"}</span>
-
+          <span>
+            {currentWorkspace?.name
+              ? `${currentWorkspace.name}'s workspace`
+              : userData?.username
+              ? `${userData.username}'s workspace`
+              : "Workspaces"}
+          </span>
           <img
             className={styles.arrowDown}
             src="/icons/arrow-angle-down.png"
@@ -89,9 +119,7 @@ function DashboardNavbar({
           />
         </button>
         <div className={styles.dropdownContent}>
-          {/* Add the username as a dropdown option */}
-         
-          {userData?.workspaces?.map((workspace) => ( // Skip the first workspace (user's default workspace)
+          {userData?.workspaces?.map((workspace) => (
             <div
               key={workspace._id}
               className={styles.workspaceItem}
@@ -159,13 +187,31 @@ function DashboardNavbar({
               >
                 {isProcessing ? "Sending..." : "Send Invite"}
               </button>
+
               <h2>Invite by Link</h2>
               <button
                 className={styles.secondaryButton}
-                onClick={() => toast.info("Copy link feature coming soon!")}
+                onClick={handleGenerateInviteLink}
               >
-                Copy link
+                Generate Invite Link
               </button>
+
+              {inviteLink && (
+                <div className={styles.linkContainer}>
+                  <input
+                    type="text"
+                    className={styles.inputField}
+                    value={inviteLink}
+                    readOnly
+                  />
+                  <button
+                    className={styles.secondaryButton}
+                    onClick={handleCopyLink}
+                  >
+                    Copy Link
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

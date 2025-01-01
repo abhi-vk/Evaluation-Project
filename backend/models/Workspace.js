@@ -7,13 +7,13 @@ const workspaceSchema = new mongoose.Schema({
     },
     owner: {
         type: mongoose.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: true,
     },
-    members: [ 
+    members: [
         {
             userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-            permission: { type: String, enum: ['view', 'edit'], default: 'view' }, 
+            permission: { type: String, enum: ['view', 'edit'], default: 'view' },
         },
     ],
     folders: [
@@ -22,7 +22,7 @@ const workspaceSchema = new mongoose.Schema({
             ref: 'Folder',
         },
     ],
-    forms: [ 
+    forms: [
         {
             type: mongoose.ObjectId,
             ref: 'Form',

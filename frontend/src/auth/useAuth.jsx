@@ -11,7 +11,7 @@ const useAuth = () => {
         const storedWorkspaceId = localStorage.getItem('workspaceId');
 
         if (!storedToken) {
-            navigate('/login');
+            
         } else {
             setToken(storedToken);
             setWorkspaceId(storedWorkspaceId);

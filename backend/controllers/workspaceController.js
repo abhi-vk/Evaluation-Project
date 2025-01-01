@@ -1,22 +1,90 @@
-const mongoose = require('mongoose');  // Import mongoose
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { ObjectId } = mongoose.Types;  // Use mongoose.Types.ObjectId for ObjectId manipulation
-
+const { ObjectId } = mongoose.Types;
+require('dotenv').config();
 const User = require('../models/User');
 const Workspace = require('../models/Workspace');
 
+const generateInviteLink = async (req, res, next) => {
+    try {
+        const workspaceId = req.activeWorkspaceId;
+        const userId = req.user;
+
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) {
+            throw Object.assign(Error("Workspace not found."), { code: 404 });
+        }
+
+        if (workspace.owner.toString() !== userId.toString()) {
+            throw Object.assign(Error("You do not have permission to generate an invite link."), { code: 403 });
+        }
+
+        const inviteLink = `${process.env.FRONTEND_URL}/join-workspace/${workspaceId}`;
+
+        res.status(200).json({
+            status: "success",
+            msg: "Invite link generated successfully.",
+            inviteLink,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const handleWorkspaceJoin = async (req, res, next) => {
+    try {
+        const { workspaceId } = req.params;
+        const userId = req.user;
+
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) {
+            throw Object.assign(Error("Workspace not found."), { code: 404 });
+        }
+
+        if (!userId) {
+            throw Object.assign(Error("You must be logged in to join a workspace."), { code: 401 });
+        }
+
+        const existingMember = workspace.members.find(member => String(member.userId) === String(userId));
+        if (existingMember) {
+            return res.status(200).json({
+                status: "success",
+                msg: `You are already a member of workspace: ${workspace.name}.`,
+            });
+        }
+
+        workspace.members.push({ userId, permission: 'view' });
+        workspace.members = [...new Map(workspace.members.map(member => [String(member.userId), member])).values()];
+        await workspace.save();
+
+        const user = await User.findById(userId);
+        if (!user.workspaces.includes(String(workspaceId))) {
+            user.workspaces.push(workspaceId);
+            user.workspaces = [...new Set(user.workspaces.map(String))];
+            await user.save();
+        }
+
+        res.status(200).json({
+            status: "success",
+            msg: `Successfully joined workspace: ${workspace.name}.`,
+            workspace,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const inviteUser = async (req, res, next) => {
     try {
-        const { inviteeEmail, permission } = req.body; // Frontend sends only email and permission
-        const workspaceId = req.activeWorkspaceId; // Dynamically set by verifyToken middleware
-        const userId = req.user; // Extract user ID from the token
+        const { inviteeEmail, permission } = req.body;
+        const workspaceId = req.activeWorkspaceId;
+        const userId = req.user;
 
         if (!workspaceId) {
             throw Object.assign(Error("Workspace ID is required."), { code: 400 });
         }
 
-        // Fetch workspace and ensure the current user is the owner
         const workspace = await Workspace.findById(workspaceId);
         if (!workspace) {
             throw Object.assign(Error("Workspace not found."), { code: 404 });
@@ -25,36 +93,29 @@ const inviteUser = async (req, res, next) => {
             throw Object.assign(Error("You do not have permission to invite users to this workspace."), { code: 403 });
         }
 
-        // Fetch the invitee user by email
         const invitee = await User.findOne({ email: inviteeEmail });
         if (!invitee) {
             throw Object.assign(Error("The invited user does not exist."), { code: 404 });
         }
 
-        // Check permission value
         if (!['view', 'edit'].includes(permission)) {
             throw Object.assign(Error("Invalid permission value. Must be 'view' or 'edit'."), { code: 400 });
         }
 
-        // Check if the invitee is already a member
         const existingMember = workspace.members.find(member => member.userId.toString() === invitee._id.toString());
         if (existingMember) {
-            // Update permission if already a member
             existingMember.permission = permission;
         } else {
-            // Add new member
             workspace.members.push({ userId: invitee._id, permission });
         }
 
         await workspace.save();
 
-        // Update invitee's user collection with the workspaceId if not already added
         if (!invitee.workspaces.includes(workspaceId)) {
             invitee.workspaces.push(workspaceId);
             await invitee.save();
         }
 
-        // Send response
         res.status(200).json({
             status: "success",
             msg: `User ${inviteeEmail} has been successfully invited with ${permission} permission.`,
@@ -67,14 +128,13 @@ const inviteUser = async (req, res, next) => {
 
 const switchWorkspace = async (req, res, next) => {
     try {
-        const { workspaceId } = req.body; // Frontend sends workspaceId in request body
-        const userId = req.user; // Extract user ID from the verified token
+        const { workspaceId } = req.body;
+        const userId = req.user;
 
         if (!workspaceId) {
             throw Object.assign(Error("Workspace ID is required."), { code: 400 });
         }
 
-        // Verify the workspace exists and the user is a member
         const workspace = await Workspace.findById(workspaceId);
         if (!workspace) {
             throw Object.assign(Error("Workspace not found."), { code: 404 });
@@ -85,14 +145,12 @@ const switchWorkspace = async (req, res, next) => {
             throw Object.assign(Error("You do not have access to this workspace."), { code: 403 });
         }
 
-        // Generate a new token with the updated activeWorkspaceId
         const newToken = jwt.sign(
             { uid: userId, activeWorkspaceId: workspaceId },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' } // Set an appropriate expiration time
+            { expiresIn: '1h' }
         );
 
-        // Send response with the new token and workspace details
         res.status(200).json({
             status: "success",
             msg: `Switched to workspace ${workspace.name} successfully.`,
@@ -108,4 +166,4 @@ const switchWorkspace = async (req, res, next) => {
     }
 };
 
-module.exports = { inviteUser, switchWorkspace };
+module.exports = { inviteUser, switchWorkspace, generateInviteLink, handleWorkspaceJoin };

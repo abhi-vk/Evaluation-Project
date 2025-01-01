@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../../auth/useAuth";
 import { userDashboardApi } from "../../services/User";
-import { useParams, useLocation } from "react-router-dom"; 
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import styles from "./dashboard.module.css";
 
 import {
@@ -15,18 +15,20 @@ import {
   createFormApi,
 } from "../../services/Form";
 
-import DashboardNavbar from "../../components/dashboardNavbar"; 
+import DashboardNavbar from "../../components/dashboardNavbar";
 import FolderButton from "../../components/folderButton";
 import FormCard from "../../components/formCard";
 import CreateFolderModal from "../../components/folderModal";
 import DeleteModal from "../../components/deleteModal";
 import CreateFormModal from "../../components/formModal";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
+import { handleWorkspaceJoinApi } from "../../services/Workspace";
 
 function Dashboard() {
   const token = useAuth();
   const { workspaceId } = useParams();
-  const location = useLocation(); 
+  const location = useLocation();
+  const navigate = useNavigate(); // Added for navigation
   const [userData, setUserData] = useState({});
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [allFolder, setAllFolder] = useState([]);
@@ -43,7 +45,7 @@ function Dashboard() {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDataFetched, setIsDataFetched] = useState(false);
   const [entityType, setEntityType] = useState(null);
-  const [currentWorkspace, setCurrentWorkspace] = useState(null); 
+  const [currentWorkspace, setCurrentWorkspace] = useState(null);
 
   const urlParams = new URLSearchParams(location.search);
   const permission = urlParams.get("permission");
@@ -76,35 +78,31 @@ function Dashboard() {
     setCreateModalOpen(false);
   };
 
-  // Function to create folder
   const createFolder = async () => {
-    setFolderNameError('');
-    
+    setFolderNameError("");
+
     if (folderName.trim().length === 0) {
-        setFolderNameError('Enter folder name');
-        return;
+      setFolderNameError("Enter folder name");
+      return;
     }
 
     try {
-        const data = await createFolderApi(folderName, token);
-        if (data) {
-            setCreateModalOpen(false); // Close the modal
-            await fetchAllFolder(); // Refresh the folder list
-            toast.success("Folder created successfully!"); // Notify the user
-        }
+      const data = await createFolderApi(folderName, token);
+      if (data) {
+        setCreateModalOpen(false);
+        await fetchAllFolder();
+        toast.success("Folder created successfully!");
+      }
     } catch (error) {
-        console.error(error);
-        if (error.response && error.response.status === 403) {
-            toast.error("You do not have permission to create folders.");
-        } else {
-            toast.error("An error occurred while creating the folder.");
-        }
+      console.error(error);
+      if (error.response && error.response.status === 403) {
+        toast.error("You do not have permission to create folders.");
+      } else {
+        toast.error("An error occurred while creating the folder.");
+      }
     }
-};
+  };
 
-
-
-  // Function to create form
   const createForm = async () => {
     setFormNameError("");
     if (formName.trim().length === 0) {
@@ -130,7 +128,6 @@ function Dashboard() {
     }
   };
 
-  // Fetch all folders
   const fetchAllFolder = async () => {
     try {
       const data = await fetchAllFolderApi(token);
@@ -140,7 +137,6 @@ function Dashboard() {
     }
   };
 
-  // Fetch all forms
   const fetchAllForm = async () => {
     try {
       const data = await fetchAllFormApi(token);
@@ -152,7 +148,6 @@ function Dashboard() {
     }
   };
 
-  // Function to delete folder
   const deleteFolder = async () => {
     if (!folderId) return;
     try {
@@ -170,7 +165,6 @@ function Dashboard() {
     }
   };
 
-  // Function to delete form
   const deleteForm = async () => {
     if (!formId) return;
     try {
@@ -188,13 +182,11 @@ function Dashboard() {
     }
   };
 
-  // Logout function
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     window.location.href = "/login";
   };
 
-  // Fetch user dashboard data
   const userDashboard = async () => {
     try {
       const data = await userDashboardApi(token);
@@ -209,11 +201,25 @@ function Dashboard() {
     }
   };
 
-  // Handle workspace switch
   const handleWorkspaceSwitch = (workspace) => {
     setCurrentWorkspace(workspace);
     fetchAllFolder();
     fetchAllForm();
+  };
+
+  const handleWorkspaceJoin = async () => {
+    if (workspaceId) {
+      try {
+        const workspace = await handleWorkspaceJoinApi(workspaceId, navigate);
+        if (workspace) {
+          setCurrentWorkspace(workspace);
+          fetchAllFolder();
+          fetchAllForm();
+        }
+      } catch (error) {
+        console.error("Error joining workspace:", error);
+      }
+    }
   };
 
   useEffect(() => {
@@ -224,10 +230,9 @@ function Dashboard() {
 
   useEffect(() => {
     if (workspaceId) {
-      console.log("Workspace ID from URL:", workspaceId);
-      console.log("Permission from URL:", permission);
+      handleWorkspaceJoin();
     }
-  }, [workspaceId, permission]);
+  }, [workspaceId]);
 
   return (
     <main className={styles.dashboard}>
