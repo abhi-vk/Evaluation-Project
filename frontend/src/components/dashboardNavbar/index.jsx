@@ -19,10 +19,22 @@ function DashboardNavbar({
     userData?.workspaces?.[0] || null
   );
   const [inviteLink, setInviteLink] = useState("");
-
-  // Theme state
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
+
+  useEffect(() => {
+    
+  
+
+    const savedWorkspace = JSON.parse(localStorage.getItem("currentWorkspace"));
+    
+    if (savedWorkspace) {
+      setCurrentWorkspace(savedWorkspace); 
+    } else if (userData?.workspaces?.[0]) {
+      setCurrentWorkspace(userData.workspaces[0]); 
+    }
+  }, [userData]); 
+  
   // Initialize the theme on first render
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -85,14 +97,14 @@ function DashboardNavbar({
 
   const handleGenerateInviteLink = async () => {
     try {
-      const link = await generateInviteLinkApi(() => {});
-      setInviteLink(link);
-      toast.success("Invite link generated successfully.");
+        const link = await generateInviteLinkApi(permission, () => {});
+        setInviteLink(link);
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to generate invite link.");
+        console.error(error);
+        toast.error("Failed to generate invite link.");
     }
-  };
+};
+
 
   const handleCopyLink = () => {
     if (!inviteLink) {

@@ -10,6 +10,11 @@ const generateInviteLink = async (req, res, next) => {
     try {
         const workspaceId = req.activeWorkspaceId;
         const userId = req.user;
+        const { permission } = req.body; // Assume permission is passed in the body.
+
+        if (!['view', 'edit'].includes(permission)) {
+            throw Object.assign(Error("Invalid permission value. Must be 'view' or 'edit'."), { code: 400 });
+        }
 
         const workspace = await Workspace.findById(workspaceId);
         if (!workspace) {
@@ -20,7 +25,7 @@ const generateInviteLink = async (req, res, next) => {
             throw Object.assign(Error("You do not have permission to generate an invite link."), { code: 403 });
         }
 
-        const inviteLink = `${process.env.FRONTEND_URL}/join-workspace/${workspaceId}`;
+        const inviteLink = `${process.env.FRONTEND_URL}/join-workspace/${workspaceId}?permission=${permission}`;
 
         res.status(200).json({
             status: "success",
@@ -32,10 +37,16 @@ const generateInviteLink = async (req, res, next) => {
     }
 };
 
+
 const handleWorkspaceJoin = async (req, res, next) => {
     try {
         const { workspaceId } = req.params;
+        const { permission } = req.query; // Fetch permission from query parameters.
         const userId = req.user;
+
+        if (!['view', 'edit'].includes(permission)) {
+            throw Object.assign(Error("Invalid permission value. Must be 'view' or 'edit'."), { code: 400 });
+        }
 
         const workspace = await Workspace.findById(workspaceId);
         if (!workspace) {
@@ -48,13 +59,11 @@ const handleWorkspaceJoin = async (req, res, next) => {
 
         const existingMember = workspace.members.find(member => String(member.userId) === String(userId));
         if (existingMember) {
-            return res.status(200).json({
-                status: "success",
-                msg: `You are already a member of workspace: ${workspace.name}.`,
-            });
+            existingMember.permission = permission; // Update the permission if already a member.
+        } else {
+            workspace.members.push({ userId, permission });
         }
 
-        workspace.members.push({ userId, permission: 'view' });
         workspace.members = [...new Map(workspace.members.map(member => [String(member.userId), member])).values()];
         await workspace.save();
 
@@ -67,13 +76,14 @@ const handleWorkspaceJoin = async (req, res, next) => {
 
         res.status(200).json({
             status: "success",
-            msg: `Successfully joined workspace: ${workspace.name}.`,
+            msg: `Successfully joined workspace: ${workspace.name} with ${permission} permission.`,
             workspace,
         });
     } catch (err) {
         next(err);
     }
 };
+
 
 const inviteUser = async (req, res, next) => {
     try {

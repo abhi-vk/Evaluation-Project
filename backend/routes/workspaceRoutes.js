@@ -5,7 +5,7 @@ const verifyToken = require('../middlewares/verifyToken');
 const { inviteUser, switchWorkspace, generateInviteLink, handleWorkspaceJoin } = require('../controllers/workspaceController');
 
 // Route to generate the invite link
-router.get('/workspace/invite-link', verifyToken, generateInviteLink);
+router.post('/workspace/invite-link', verifyToken, generateInviteLink);
 
 // Route to handle the user joining a workspace via the invite link
 router.post('/workspace/join/:workspaceId', verifyToken, handleWorkspaceJoin);

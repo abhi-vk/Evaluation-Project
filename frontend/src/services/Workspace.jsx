@@ -82,7 +82,7 @@ export const switchWorkspaceApi = async (workspaceId, navigate) => {
 };
 
 // Generate Invite Link API
-export const generateInviteLinkApi = async (navigate) => {
+export const generateInviteLinkApi = async (permission, navigate) => {
     const token = localStorage.getItem('authToken'); 
 
     if (!token) {
@@ -91,13 +91,19 @@ export const generateInviteLinkApi = async (navigate) => {
         return;
     }
 
+    if (!['view', 'edit'].includes(permission)) {
+        toast.error('Invalid permission value. Must be "view" or "edit".');
+        return;
+    }
+
     try {
         const response = await fetch(`${baseURL}/workspace/invite-link`, {
-            method: 'GET',
+            method: 'POST', // Changed to POST to include the permission in the body
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({ permission }), // Include permission
         });
 
         if (response.status === 200) {
@@ -108,8 +114,10 @@ export const generateInviteLinkApi = async (navigate) => {
                 toast.success(msg);
                 return inviteLink;
             } else {
-                handleApiRes(data);
+                handleApiRes(data); // Handle other response statuses
             }
+        } else if (response.status === 403) {
+            toast.error('You do not have permission to generate an invite link.');
         } else {
             throw new Error('Failed to generate invite link');
         }
@@ -118,8 +126,10 @@ export const generateInviteLinkApi = async (navigate) => {
     }
 };
 
+
 // Handle Workspace Join API
-export const handleWorkspaceJoinApi = async (workspaceId, navigate) => {
+// Handle Workspace Join API
+export const handleWorkspaceJoinApi = async (workspaceId, permission, navigate) => {
     const token = localStorage.getItem('authToken'); 
 
     if (!token) {
@@ -128,8 +138,13 @@ export const handleWorkspaceJoinApi = async (workspaceId, navigate) => {
         return;
     }
 
+    if (!['view', 'edit'].includes(permission)) {
+        toast.error('Invalid permission value. Must be "view" or "edit".');
+        return;
+    }
+
     try {
-        const response = await fetch(`${baseURL}/workspace/join/${workspaceId}`, {
+        const response = await fetch(`${baseURL}/workspace/join/${workspaceId}?permission=${permission}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -154,3 +169,4 @@ export const handleWorkspaceJoinApi = async (workspaceId, navigate) => {
         handleApiErr(error, navigate);
     }
 };
+

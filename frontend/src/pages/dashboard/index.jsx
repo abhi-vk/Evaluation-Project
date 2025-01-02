@@ -209,18 +209,27 @@ function Dashboard() {
 
   const handleWorkspaceJoin = async () => {
     if (workspaceId) {
-      try {
-        const workspace = await handleWorkspaceJoinApi(workspaceId, navigate);
-        if (workspace) {
-          setCurrentWorkspace(workspace);
-          fetchAllFolder();
-          fetchAllForm();
+        try {
+            const workspace = await handleWorkspaceJoinApi(workspaceId,permission, navigate);
+            if (workspace) {
+                setCurrentWorkspace(workspace);
+                 
+
+                if (permission) {
+                    workspace.permission = permission;
+                }
+
+                fetchAllFolder();
+                fetchAllForm();
+                toast.success(`Joined workspace: ${workspace.name}`);
+            }
+        } catch (error) {
+            console.error("Error joining workspace:", error);
+            toast.error("Failed to join the workspace. Please try again.");
         }
-      } catch (error) {
-        console.error("Error joining workspace:", error);
-      }
     }
-  };
+};
+
 
   useEffect(() => {
     if (token && !isDataFetched) {
