@@ -3,7 +3,7 @@ import { handleApiRes, handleApiErr } from '../auth/apiUtils';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
-// Utility function to get headers with token and optional workspaceId
+
 const getAuthHeadersWithWorkspace = () => {
     const token = localStorage.getItem('authToken');
     const workspaceId = localStorage.getItem('workspaceId');
@@ -44,18 +44,25 @@ export const createFormApi = async (folderId, formName, token) => {
         console.log("API response JSON:", data);
 
         if (response.ok) {
+            toast.success(data.msg || "Form created successfully!");
             return {
                 formId: data.formId,
-                msg: data.msg
+                msg: data.msg,
             };
         } else {
-            console.error("API call failed", response.status, response.statusText);
-            return null;
+            const errorMsg = data.msg || "An error occurred. Please try again.";
+            toast.error(errorMsg); 
+            return {
+                error: errorMsg,
+            };
         }
     } catch (error) {
+        const networkErrorMsg = "A network error occurred. Please try again later.";
         console.error("Error in API call:", error);
-        handleApiErr(error);
-        return null;
+        toast.error(networkErrorMsg); 
+        return {
+            error: networkErrorMsg,
+        };
     }
 };
 
@@ -78,16 +85,16 @@ export const fetchAllFormApi = async (token, navigate) => {
             if (status === 'success') {
                 return formData;
             } else {
-                handleApiRes(data); // Handle non-success status
+                handleApiRes(data); 
             }
         } else {
             const errorData = await response.json();
-            console.error('API Error:', errorData); // Log the error data
+            console.error('API Error:', errorData); 
             throw new Error('Failed to fetch forms');
         }
     } catch (error) {
         console.error('API Error:', error);
-        handleApiErr(error, navigate); // Handle fetch or network errors
+        handleApiErr(error, navigate); 
     }
 };
 
@@ -131,7 +138,7 @@ export const deleteFormApi = async (formId) => {
   
       if (!formId) {
         console.error('Form ID is required');
-        return null; // Return null if formId is not provided
+        return null; 
       }
   
       const response = await fetch(`${baseURL}/form/delete/${formId}`, {
@@ -148,23 +155,23 @@ export const deleteFormApi = async (formId) => {
       const data = await response.json();
       console.log('Form deleted successfully:', data);
   
-      return data; // Return data for further processing
+      return data; 
     } catch (error) {
       console.error('Error:', error);
-      handleApiErr(error); // Handle error appropriately
-      return null; // Return null in case of error
+      handleApiErr(error); 
+      return null; 
     }
   };
   
 
-// Share Form
+
 // Share Form
 export const shareFormApi = async (formId) => {
     try {
         const response = await fetch(`${baseURL}/form/share/${formId}`, {
             method: 'GET',
             headers: {
-                // Add any necessary headers here, if required
+                
             },
         });
 
@@ -174,10 +181,10 @@ export const shareFormApi = async (formId) => {
         if (status === 'success') {
             return formData;
         } else {
-            handleApiRes(data);  // Handle error or response if status is not success
+            handleApiRes(data);  
         }
     } catch (error) {
-        handleApiErr(error, navigate);  // Handle error
+        handleApiErr(error, navigate);  
     }
 };
 
@@ -187,7 +194,7 @@ export const countFormHitApi = async (formId) => {
         const response = await fetch(`${baseURL}/form/hits/${formId}`, {
             method: 'POST',
             headers: {
-                // Add any necessary headers here, if required
+                
             },
         });
 
@@ -197,10 +204,10 @@ export const countFormHitApi = async (formId) => {
         if (status === 'success') {
             return msg;
         } else {
-            handleApiRes(data);  // Handle error or response if status is not success
+            handleApiRes(data);  
         }
     } catch (error) {
-        handleApiErr(error, navigate);  // Handle error
+        handleApiErr(error, navigate);  
     }
 };
 
@@ -212,7 +219,7 @@ export const saveFormResponseApi = async (formId, formResponse) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // Add any necessary headers here, if required
+                
             },
             body: JSON.stringify(formResponse),
         });
@@ -223,9 +230,9 @@ export const saveFormResponseApi = async (formId, formResponse) => {
         if (status === 'success') {
             return responseData;
         } else {
-            handleApiRes(data);  // Handle error or response if status is not success
+            handleApiRes(data);  
         }
     } catch (error) {
-        handleApiErr(error, navigate);  // Handle error
+        handleApiErr(error, navigate);  
     }
 };

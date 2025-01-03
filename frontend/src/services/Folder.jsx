@@ -5,13 +5,13 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 // Utility to handle API response logic
 const handleApiResponse = async (response, successMessage) => {
-    if (response.ok) { // Adjusted to use `response.ok` for fetch
+    if (response.ok) { 
         const data = await response.json();
         const { status, msg } = data;
 
         if (status === 'success') {
             if (successMessage) toast.success(msg);
-            return data.data || {}; // Safeguard in case `data` is undefined
+            return data.data || {}; 
         } else {
             handleApiRes(data);
         }
@@ -31,6 +31,7 @@ const getAuthHeaders = () => {
 };
 
 // Create Folder API
+
 export const createFolderApi = async (folderName) => {
     try {
         console.log("Request to create folder:", folderName);
@@ -41,14 +42,34 @@ export const createFolderApi = async (folderName) => {
             body: JSON.stringify({ folderName }),
         });
 
-        console.log("Response Status:", response.status);
-        const responseBody = await response.clone().json();
-        console.log("Response Body:", responseBody);
+        const responseBody = await response.json();
+        console.log("Response Status:", response.status, "Response Body:", responseBody);
 
-        return handleApiResponse(response, 'Folder created successfully');
+        if (response.ok) {
+            toast.success('Folder created successfully');
+            return responseBody;
+        } else {
+            // Backend-specific error message handling
+            const errorMessage = responseBody?.msg || responseBody?.message || 'An error occurred while creating the folder.';
+
+            if (errorMessage.includes('already exists')) {
+                toast.error('A folder with this name already exists in the workspace.');
+            } else {
+                toast.error(errorMessage);
+            }
+
+            // Don't throw here to prevent triggering the catch block
+            return Promise.reject(new Error(errorMessage));
+        }
     } catch (error) {
         console.error("Error in createFolderApi:", error);
-        handleApiErr(error);
+
+        // Show a generic error toast only if no specific error is handled above
+        if (!error.message.includes('already exists') && !error.message.includes('An error occurred while creating the folder.')) {
+            toast.error('Something went wrong. Please try again.');
+        }
+
+        handleApiErr(error); 
     }
 };
 

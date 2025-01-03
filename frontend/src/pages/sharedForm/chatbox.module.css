@@ -5,6 +5,7 @@
     text-align: left;
     gap: 8px;
     max-width: calc(100% - 50px);
+    margin-top: 20px;
 }
 
 .chatbox img,

@@ -1,16 +1,16 @@
 import { toast } from 'react-toastify';
 
-// Handle API response
+
 export const handleApiRes = (response) => {
     const { status, msg } = response;
     
-    // JWT Error handling
+  
     if (status === 'jwtError') {
         toast.error('Session expired. Please log in again.');
-        window.location.href = '/login';  // Optionally redirect to login
+        window.location.href = '/login'; 
         throw new Error('JWT Error');
     } else {
-        // Show error message
+        
         if (msg) {
             toast.error(msg);
         } else {
@@ -19,13 +19,13 @@ export const handleApiRes = (response) => {
     }
 };
 
-// Handle API error (e.g., network or 401 error)
+
 export const handleApiErr = (error, navigate) => {
     // Unauthorized error (401)
     if (error.response?.status === 401) {
-        localStorage.removeItem("authToken"); // Clear invalid token
+        localStorage.removeItem("authToken"); 
         toast.error('Session expired. Please log in again.');
-        if (navigate) navigate('/login'); // Redirect if navigate is provided
+        if (navigate) navigate('/login'); 
     } else {
         console.error("API Error:", error.message || error);
     }

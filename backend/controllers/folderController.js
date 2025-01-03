@@ -29,7 +29,7 @@ const createFolder = async (req, res, next) => {
     try {
         const { folderName } = req.body;
         const workspaceId = req.activeWorkspaceId;
-        const userId = req.user; // Extracted from JWT token
+        const userId = req.user; 
 
         if (!folderName) throw Object.assign(Error("Please enter folder name."), { code: 400 });
         if (!workspaceId) throw Object.assign(Error("Workspace ID is required."), { code: 400 });
@@ -41,6 +41,12 @@ const createFolder = async (req, res, next) => {
         // Check User Permission
         if (!hasEditPermissions(workspace, userId)) {
             throw Object.assign(Error("You do not have permission to create folders."), { code: 403 });
+        }
+
+        // Check if folder name already exists in the workspace
+        const existingFolder = await Folder.findOne({ folderName, workspaceId });
+        if (existingFolder) {
+            throw Object.assign(Error("A folder with this name already exists in the workspace."), { code: 400 });
         }
 
         // Create Folder
@@ -55,6 +61,7 @@ const createFolder = async (req, res, next) => {
         next(err);
     }
 };
+
 
 // Fetch All Folders for a Workspace
 const fetchAllFolder = async (req, res, next) => {

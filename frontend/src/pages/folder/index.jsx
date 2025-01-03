@@ -80,7 +80,7 @@ function Folders() {
     };
 
     useEffect(() => {
-        fetchAllFormByFolder();  // Fetch forms when component mounts or fid/token changes
+        fetchAllFormByFolder();  
     }, [fetchAllFormByFolder]);
 
     return (

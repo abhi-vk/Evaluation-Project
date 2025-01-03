@@ -45,8 +45,19 @@ const createForm = async (req, res, next) => {
             throw Object.assign(Error("You do not have permission to create forms."), { code: 403 });
         }
 
+        // Check if a form with the same name already exists in the workspace
+        const duplicateForm = await Form.findOne({
+            workspaceId,
+            folderId: folderId || null, // Check folderId (null for main workspace)
+            formName,
+        });
+
+        if (duplicateForm) {
+            throw Object.assign(Error("A form with this name already exists in the specified workspace or folder."), { code: 400 });
+        }
+
         // Create the form
-        const newForm = await Form.create({ workspaceId, folderId, formName, formTheme: "#ffffff" });
+        const newForm = await Form.create({ workspaceId, folderId: folderId || null, formName, formTheme: "#ffffff" });
 
         // Update the workspace's forms array
         await Workspace.findByIdAndUpdate(

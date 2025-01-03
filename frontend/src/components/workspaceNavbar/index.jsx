@@ -15,9 +15,21 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
     const [formName, setFormName] = useState('');
     const [formSequence, setFormSequence] = useState('');
     const [formNameError, setFormNameError] = useState('');
-    const [hasFetched, setHasFetched] = useState(false); // To track if the form data is fetched
+    const [hasFetched, setHasFetched] = useState(false);
 
-    // Create a new form
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+    // Initialize theme
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+    };
+
     const createForm = async () => {
         setFormNameError('');
         if (formName.trim().length === 0) {
@@ -29,26 +41,24 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
         if (response && response.formId) {
             const newFormId = response.formId;
             setFormId(newFormId);
-            setWorkspaceId(newFormId);  // Pass the new formId to the parent
-            navigate(`/workspace?wid=${newFormId}`);  // Navigate to the new workspace
+            setWorkspaceId(newFormId);
+            navigate(`/workspace?wid=${newFormId}`);
         } else {
-            toast.error("Form creation failed. Please try again.");
+            toast.error('Form creation failed. Please try again.');
         }
     };
 
-    // Fetch form data by ID
     const fetchFormById = async () => {
         const data = await fetchFormByIdApi(formId, token);
         if (data) {
             setFormName(data.formName);
             setFormSequence(data.formSequence);
-            setHasFetched(true); // Mark as fetched
+            setHasFetched(true);
         } else {
-            toast.error("Failed to fetch form data.");
+            toast.error('Failed to fetch form data.');
         }
     };
 
-    // Update the form name
     const updateForm = async () => {
         if (formName.trim().length === 0) return;
 
@@ -56,7 +66,6 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
         if (data) setFormName(formName);
     };
 
-    // Save the form (either create or update)
     const handleFormSave = async () => {
         if (formId) {
             if (updateFormSequence) {
@@ -69,23 +78,21 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
         }
     };
 
-    // Copy form link to clipboard
     const copyFormLink = async () => {
         const link = `${window.location.origin}/share/${formId}`;
         try {
             await navigator.clipboard.writeText(link);
-            toast.success("Form link copied successfully.");
+            toast.success('Form link copied successfully.');
         } catch (error) {
-            toast.error("Failed to copy the link.");
+            toast.error('Failed to copy the link.');
         }
     };
 
-    // Fetch form data when `token` or `formId` changes
     useEffect(() => {
         if (token && formId && !hasFetched) {
-            fetchFormById();  // Fetch form data only when `formId` and `token` are available
+            fetchFormById();
         }
-    }, [token, formId, hasFetched]);  // Only run when `formId` or `token` changes
+    }, [token, formId, hasFetched]);
 
     return (
         <div className={styles.navbar}>
@@ -105,7 +112,6 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
                 >
                     Flow
                 </NavLink>
-            
                 <NavLink
                     to={formId ? `/response?wid=${formId}` : window.location}
                     className={({ isActive }) => isActive && formId ? styles.active : ''}
@@ -114,6 +120,18 @@ function WorkspaceNavbar({ setWorkspaceId, updateFormSequence }) {
                 </NavLink>
             </div>
             <div className={styles.formAction}>
+                 <div className={styles.toggleContainer}>
+                          <span>Light</span>
+                          <label className={styles.switch}>
+                            <input
+                              type="checkbox"
+                              checked={theme === "dark"}
+                              onChange={toggleTheme}
+                            />
+                            <span className={styles.slider}></span>
+                          </label>
+                          <span>Dark</span>
+                        </div>
                 <button
                     disabled={formSequence.length === 0}
                     onClick={copyFormLink}

@@ -16,11 +16,11 @@ function Response() {
 
     const [noResponse, setNoResponse] = useState(false);
     const [formData, setFormData] = useState({ formHits: 0, formSequence: [], formResponse: [] });
-    const [hasFetched, setHasFetched] = useState(false); // New flag to track fetch status
+    const [hasFetched, setHasFetched] = useState(false); 
 
     const { formHits, formSequence, formResponse } = formData;
 
-    // Filter to get all user-related keys from formSequence
+
     const headers = formSequence
         .filter((data) => data.key.includes("user"))
         .map((item) => item.key);
@@ -33,7 +33,7 @@ function Response() {
 
         formResponse.forEach((item) => {
             const resLength = Object.keys(item).length;
-            seqLength === resLength - 2 ? completes++ : starts++; // Check if response is complete or just started
+            seqLength === resLength - 2 ? completes++ : starts++; 
         });
 
         setFormStarts(starts);
@@ -103,7 +103,7 @@ function Response() {
                                         <td>{index + 1}</td>
                                         <td>{valueRow.startDate}</td>
                                         {headers.map((key, idx) => (
-                                            <td key={`${key}-${idx}`}>{valueRow[key]}</td> // Ensure key is unique
+                                            <td key={`${key}-${idx}`}>{valueRow[key]}</td> 
                                         ))}
                                     </tr>
                                 ))}
@@ -127,7 +127,7 @@ function Response() {
                         radius={20}
                         label={({ data, dataIndex }) => {
                             const value = data && data[dataIndex] ? data[dataIndex].value : 0;
-                            return value > 0 ? `${value}%` : '';  // Only show percentage if it's greater than 0
+                            return value > 0 ? `${value}%` : '';  
                         }}
                         labelStyle={{
                             fontSize: '18px',

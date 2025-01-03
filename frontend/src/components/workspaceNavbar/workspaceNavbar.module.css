@@ -19,7 +19,9 @@
     background: var(--primary-bg) !important; /* Adapted for both themes */
     color: var(--dark-text); /* Adapted for both themes */
 }
-
+.formNav{
+    margin-left: 150px;
+}
 .formNav,
 .formAction {
     display: flex;
@@ -29,12 +31,12 @@
 
 .formNav a,
 .formAction a {
-    color: var(--dark-text); /* Adapted for both themes */
+    color: var(--dark-text); 
     display: flex;
     border: 1px solid transparent;
     border-radius: 5px;
     padding: 5px 10px;
-    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    transition: all 0.3s ease; 
 }
 
 .formNav .active {
@@ -50,7 +52,7 @@
     padding: 5px 20px;
     font-weight: normal;
     display: flex;
-    background: var(--accent-color); /* Default button background */
+    background: #4ADE80CC; /* Default button background */
     color: white; /* Text color for better visibility */
     border: none;
     border-radius: 5px;
@@ -65,10 +67,61 @@
 }
 
 .formAction button:nth-child(2) {
-    background: var(--accent-color); /* Highlighted button */
-    color: white; /* Adapted for both themes */
+    background: var(--accent-color); 
+    color: white; 
 }
 
 .formAction button:hover:not(:disabled) {
-    background: #0056b3; /* Slightly darker on hover for emphasis */
+    background: #0056b3; 
 }
+.toggleContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color); /* Adapts to active theme */
+    transition: 0.4s;
+    border-radius: 34px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--dark-text); /* Ensure visibility in all themes */
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: var(--accent-color); /* Matches active theme accent */
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+  

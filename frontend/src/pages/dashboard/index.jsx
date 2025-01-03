@@ -116,7 +116,7 @@ function Dashboard() {
         fetchAllForm();
         setFormName("");
         setCreateFormModalOpen(false);
-        toast.success("Form created successfully!");
+        
       }
     } catch (error) {
       console.error(error);
