@@ -131,37 +131,43 @@ export const updateFormApi = async (formId, formData) => {
     }
 };
 
-// Delete Form
+
 export const deleteFormApi = async (formId) => {
     try {
-      console.log('Deleting Form ID:', formId);
-  
-      if (!formId) {
-        console.error('Form ID is required');
-        return null; 
-      }
-  
-      const response = await fetch(`${baseURL}/form/delete/${formId}`, {
-        method: 'DELETE',
-        headers: getAuthHeadersWithWorkspace(),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error from server:', errorData);
-        throw new Error('Failed to delete form');
-      }
-  
-      const data = await response.json();
-      console.log('Form deleted successfully:', data);
-  
-      return data; 
+        console.log('Deleting Form ID:', formId);
+
+        if (!formId) {
+            console.error('Form ID is required');
+            return null; 
+        }
+
+        const response = await fetch(`${baseURL}/form/delete/${formId}`, {
+            method: 'DELETE',
+            headers: getAuthHeadersWithWorkspace(),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error from server:', errorData);
+            
+            // Show toast with error message
+            toast.error(errorData.msg || 'Failed to delete the form.');
+            throw new Error('Failed to delete form');
+        }
+
+        const data = await response.json();
+        console.log('Form deleted successfully:', data);
+
+        // Show toast for successful deletion
+        toast.success('Form deleted successfully!');
+
+        return data; 
     } catch (error) {
-      console.error('Error:', error);
-      handleApiErr(error); 
-      return null; 
+        console.error('Error:', error);
+        toast.error('Error occurred while deleting the form.'); // Show general error toast
+        return null; 
     }
-  };
+};
   
 
 
